@@ -24,11 +24,16 @@ LIBS = -lm
 #---- Build rules
 #
 
-all: bin/test.x
+all: bin/test.x bin/benchmark.x
 
 bin/test.x: $(PROJ_SRC)/assoc_legendre_tests.cxx $(PROJ_INC)/associated_legendre_functions.hxx
 	mkdir -p bin
 	$(CXX) -I $(PROJ_INC) $(CXXOPTS) $(PROJ_SRC)/assoc_legendre_tests.cxx -o bin/test.x
+
+bin/benchmark.x: $(PROJ_SRC)/assoc_legendre_benchmark.cxx $(PROJ_INC)/associated_legendre_functions.hxx
+	mkdir -p bin
+	$(CXX) -I $(PROJ_INC) $(CXXOPTS) $(PROJ_SRC)/assoc_legendre_benchmark.cxx -o bin/benchmark.x
+
 
 .PHONY: clean
 clean:
@@ -46,10 +51,10 @@ run: bin/test.x
 #
 
 .PHONY: prof
-prof: bin/test.x
+prof: bin/benchmark.x
 	mkdir -p prof
-	LD_PRELOAD=/usr/lib/libprofiler.so CPUPROFILE=prof/cpu_profile bin/test.x
-	google-pprof --text bin/test.x prof/cpu_profile
+	LD_PRELOAD=/usr/lib/libprofiler.so CPUPROFILE=prof/cpu_profile bin/benchmark.x
+	google-pprof --text bin/benchmark.x prof/cpu_profile
 
 
 #
