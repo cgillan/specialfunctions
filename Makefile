@@ -1,6 +1,6 @@
 #!/bin/make
 
-PROJ_DIR = $(HOME)/CPC_paper_proposal
+PROJ_DIR = .
 
 PROJ_INC = $(PROJ_DIR)/inc
 
@@ -12,33 +12,46 @@ PROJ_BIN = $(PROJ_DIR)/bin
 
 CXX = g++
 
-CXXOPTS = -O2   
+CXXOPTS = -O2
 
-CXXOPTS +=-std=c++0x -v 
+CXXOPTS +=-std=c++0x -g3
 
-LIBS = -lm 
-#LIBS += -lrt   
+LIBS = -lm
+#LIBS += -lrt
 
-#
-#---- Files to compile and link to binaries
-#
-
-SRCS=$(PROJ_SRC)/assoc_legendre_tests.cxx
-
-EXEC=$(PROJ_BIN)/test.x
 
 #
-#---- Build rules 
+#---- Build rules
 #
 
-all: clean complink 
+all: bin/test.x
 
-complink:
-	$(CXX) -I $(PROJ_INC) $(CXXOPTS) -o $(EXEC) $(SRCS) $(LIBS) 
+bin/test.x: $(PROJ_SRC)/assoc_legendre_tests.cxx $(PROJ_INC)/associated_legendre_functions.hxx
+	mkdir -p bin
+	$(CXX) -I $(PROJ_INC) $(CXXOPTS) $(PROJ_SRC)/assoc_legendre_tests.cxx -o bin/test.x
 
+.PHONY: clean
 clean:
-	$(RM) -vf *.x *.o 
+	$(RM) -vrf bin
+	$(RM) -vrf prof
+
+.PHONY: run
+run: bin/test.x
+	./bin/test.x
+
+
 
 #
-#---- End of file 
+#---- Profiling rules
+#
+
+.PHONY: prof
+prof: bin/test.x
+	mkdir -p prof
+	LD_PRELOAD=/usr/lib/libprofiler.so CPUPROFILE=prof/cpu_profile bin/test.x
+	google-pprof --text bin/test.x prof/cpu_profile
+
+
+#
+#---- End of file
 #
