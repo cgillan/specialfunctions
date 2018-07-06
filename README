@@ -1,0 +1,61 @@
+
+Background
+----------
+
+This directory hierarchy contains the code which implements 
+computation of the associated Legendre functions for integer
+only values of the degree and order, which are typically denoted
+as "l" and "m" respectively. 
+
+The Fortran 90 program published in the paper
+
+   A new Fortran 90 program to compute regular and irregular
+   associated Legendre functions
+
+   B L Schneider, J Segura, A Gil, X Guan and K Bartschat
+
+   Journal Computer Physics  Comminucations
+   Volume 181, 2010, pp 2091-7
+
+has been converted to C++ templates. These make the type for the
+computation selectable at comile time from float, double and 
+long double.
+
+Note that the C++11 features in the compiler must be enabled.
+The code has been tested with g++ and so the --std=c++0x option 
+needs to be used on the compiler line.
+
+Directory structure
+-------------------
+
+./inc  The C++ templates as described above are located here
+
+./src  A test driver program which uses the templates is placed here
+
+       This driver computes the P_lm and Q_lm and may therefore
+       be used to compare with the table of function values 
+       reported in the research paper above.
+
+./bin  The binary for the test program is placed in this location
+
+Compilation
+-----------
+
+There is a Makefile at the top level of this directory structure.
+
+All that is rerquired is to type 
+
+      make
+
+The test binary can then be run by typing 
+
+      ./bin/test.x 
+
+Note that the C++11 features in the compiler must be enabled.
+The code has been tested with g++ and so the --std=c++0x option
+needs to be used on the compiler line.
+
+*** End ***
+
+
+ 
