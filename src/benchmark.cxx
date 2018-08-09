@@ -224,17 +224,17 @@ int main(int argc, char **argv)
 
    //
 
-  for(auto &point_ref : points_vec)
-   // #pragma omp parallel for
-   // for(std::size_t i = 0; i<points_vec.size(); i++) {
-      // auto& point_ref = points_vec[i];
+  // for(auto &point_ref : points_vec)
+   #pragma omp parallel for
+   for(std::size_t i = 0; i<points_vec.size(); i++) {
+      auto& point_ref = points_vec[i];
       {
        cplm(point_ref.l,
             point_ref.m,
             point_ref.zarg,
             point_ref.zfunc);
       }
-   // }
+   }
        // End of loop over points in the tuple vector.
 
    //

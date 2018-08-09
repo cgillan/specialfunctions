@@ -22,15 +22,19 @@ LIBS = -lm
 #---- Build rules
 #
 
-all: bin/benchmark.x bin/benchmark_with_results.x
+all: bin/benchmark_seq.x bin/benchmark_omp.x bin/benchmark_with_results.x
 
-bin/benchmark.x: Makefile $(PROJ_SRC)/benchmark.cxx $(PROJ_INC)/associated_legendre_functions.hxx
+bin/benchmark_seq.x: Makefile $(PROJ_SRC)/benchmark.cxx $(PROJ_INC)/associated_legendre_functions.hxx
 	mkdir -p bin
-	$(CXX) -I $(PROJ_INC) $(CXXOPTS) $(PROJ_SRC)/benchmark.cxx -o bin/benchmark.x -DSKIP_PRINTING_RESULTS=1
+	$(CXX) -I $(PROJ_INC) $(CXXOPTS) $(PROJ_SRC)/benchmark.cxx -o bin/benchmark_seq.x -DSKIP_PRINTING_RESULTS=1
+
+bin/benchmark_omp.x: Makefile $(PROJ_SRC)/benchmark.cxx $(PROJ_INC)/associated_legendre_functions.hxx
+	mkdir -p bin
+	$(CXX) -I $(PROJ_INC) $(CXXOPTS) -fopenmp $(PROJ_SRC)/benchmark.cxx -o bin/benchmark_omp.x -DSKIP_PRINTING_RESULTS=1
 
 bin/benchmark_with_results.x: Makefile $(PROJ_SRC)/benchmark.cxx $(PROJ_INC)/associated_legendre_functions.hxx
 	mkdir -p bin
-	$(CXX) -I $(PROJ_INC) $(CXXOPTS) $(PROJ_SRC)/benchmark.cxx -o bin/benchmark_with_results.x
+	$(CXX) -I $(PROJ_INC) $(CXXOPTS) -fopenmp $(PROJ_SRC)/benchmark.cxx -o bin/benchmark_with_results.x
 
 
 .PHONY: clean
@@ -48,12 +52,19 @@ run: bin/benchmark_with_results.x
 #---- Profiling rules
 #
 
-.PHONY: prof
-prof: bin/benchmark.x
+.PHONY: prof_seq
+prof_seq: bin/benchmark_seq.x
 	mkdir -p prof
-	LD_PRELOAD=/usr/lib/libprofiler.so CPUPROFILE=prof/cpu_profile bin/benchmark.x
-	google-pprof --text bin/benchmark.x prof/cpu_profile
-	google-pprof --web bin/benchmark.x prof/cpu_profile
+	LD_PRELOAD=/usr/lib/libprofiler.so CPUPROFILE=prof/cpu_profile bin/benchmark_seq.x
+	google-pprof --text bin/benchmark_seq.x prof/cpu_profile
+	google-pprof --web bin/benchmark_seq.x prof/cpu_profile
+
+.PHONY: prof_omp
+prof_omp: bin/benchmark_omp.x
+	mkdir -p prof
+	LD_PRELOAD=/usr/lib/libprofiler.so CPUPROFILE=prof/cpu_profile bin/benchmark_omp.x
+	google-pprof --text bin/benchmark_omp.x prof/cpu_profile
+	google-pprof --web bin/benchmark_omp.x prof/cpu_profile
 
 
 #
