@@ -72,7 +72,7 @@ prof_omp: bin/benchmark_omp.x
 	google-pprof --web bin/benchmark_omp.x prof/cpu_profile
 
 .PHONY: prof_als
-prof_omp: bin/benchmark_als.x
+prof_als: bin/benchmark_als.x
 	mkdir -p prof
 	LD_PRELOAD=/usr/lib/libprofiler.so CPUPROFILE=prof/cpu_profile bin/benchmark_als.x
 	google-pprof --text bin/benchmark_als.x prof/cpu_profile
