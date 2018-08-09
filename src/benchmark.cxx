@@ -57,6 +57,23 @@ const bool G_PRINT_RESULTS = false;
 const bool G_PRINT_RESULTS = true;
 #endif
 
+#ifndef USE_ALLSCALE
+
+  template<typename List, typename Body>
+  void pfor(List& list, const Body& body) {
+    #pragma omp parallel for
+    for(std::size_t i = 0; i<list.size(); i++) {
+       body(list[i]);
+    }
+  }
+
+#else
+
+#include "allscale/api/user/algorithm/pfor.h"
+using allscale::api::user::algorithm::pfor;
+
+#endif
+
 /**
  *  Main program
  *
@@ -224,17 +241,14 @@ int main(int argc, char **argv)
 
    //
 
-  // for(auto &point_ref : points_vec)
-   #pragma omp parallel for
-   for(std::size_t i = 0; i<points_vec.size(); i++) {
-      auto& point_ref = points_vec[i];
-      {
-       cplm(point_ref.l,
-            point_ref.m,
-            point_ref.zarg,
-            point_ref.zfunc);
-      }
-   }
+   pfor(points_vec,[](auto& point_ref){
+     cplm(point_ref.l,
+          point_ref.m,
+          point_ref.zarg,
+          point_ref.zfunc);
+     }
+   );
+
        // End of loop over points in the tuple vector.
 
    //
