@@ -12,9 +12,7 @@ PROJ_BIN = $(PROJ_DIR)/bin
 
 CXX = g++
 
-CXXOPTS = -O2
-
-CXXOPTS +=-std=c++0x -g3
+CXXOPTS = -O3 -std=c++14 -g3
 
 LIBS = -lm
 #LIBS += -lrt
@@ -24,15 +22,15 @@ LIBS = -lm
 #---- Build rules
 #
 
-all: bin/test.x bin/benchmark.x
+all: bin/benchmark.x bin/benchmark_with_results.x
 
-bin/test.x: $(PROJ_SRC)/assoc_legendre_tests.cxx $(PROJ_INC)/associated_legendre_functions.hxx
+bin/benchmark.x: Makefile $(PROJ_SRC)/benchmark.cxx $(PROJ_INC)/associated_legendre_functions.hxx
 	mkdir -p bin
-	$(CXX) -I $(PROJ_INC) $(CXXOPTS) $(PROJ_SRC)/assoc_legendre_tests.cxx -o bin/test.x
+	$(CXX) -I $(PROJ_INC) $(CXXOPTS) $(PROJ_SRC)/benchmark.cxx -o bin/benchmark.x -DSKIP_PRINTING_RESULTS=1
 
-bin/benchmark.x: $(PROJ_SRC)/assoc_legendre_benchmark.cxx $(PROJ_INC)/associated_legendre_functions.hxx
+bin/benchmark_with_results.x: Makefile $(PROJ_SRC)/benchmark.cxx $(PROJ_INC)/associated_legendre_functions.hxx
 	mkdir -p bin
-	$(CXX) -I $(PROJ_INC) $(CXXOPTS) $(PROJ_SRC)/assoc_legendre_benchmark.cxx -o bin/benchmark.x
+	$(CXX) -I $(PROJ_INC) $(CXXOPTS) $(PROJ_SRC)/benchmark.cxx -o bin/benchmark_with_results.x
 
 
 .PHONY: clean
@@ -41,8 +39,8 @@ clean:
 	$(RM) -vrf prof
 
 .PHONY: run
-run: bin/test.x
-	./bin/test.x
+run: bin/benchmark_with_results.x
+	./bin/benchmark_with_results.x
 
 
 
@@ -55,6 +53,7 @@ prof: bin/benchmark.x
 	mkdir -p prof
 	LD_PRELOAD=/usr/lib/libprofiler.so CPUPROFILE=prof/cpu_profile bin/benchmark.x
 	google-pprof --text bin/benchmark.x prof/cpu_profile
+	google-pprof --web bin/benchmark.x prof/cpu_profile
 
 
 #
