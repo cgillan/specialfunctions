@@ -1,0 +1,11 @@
+prefix=/users/2037718/HHInts/third_party/libs/gsl
+exec_prefix=/users/2037718/HHInts/third_party/libs/gsl
+libdir=/users/2037718/HHInts/third_party/libs/gsl/lib
+includedir=/users/2037718/HHInts/third_party/libs/gsl/include
+GSL_CBLAS_LIB=-lgslcblas
+
+Name: GSL
+Description: GNU Scientific Library
+Version: 2.4
+Libs: -L/users/2037718/HHInts/third_party/libs/gsl/lib -lgsl ${GSL_CBLAS_LIB} -lm -lm 
+Cflags: -I/users/2037718/HHInts/third_party/libs/gsl/include
