@@ -1,0 +1,3 @@
+[submodule "tuned/allscale_api"]
+	path = tuned/allscale_api
+	url = https://github.com/allscale/allscale_api.git
