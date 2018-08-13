@@ -1,3 +1,0 @@
-[submodule "allscale_api"]
-	path = allscale_api
-	url = git@github.com:allscale/allscale_api.git
