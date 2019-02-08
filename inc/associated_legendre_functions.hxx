@@ -30,6 +30,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <complex> 
+
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -126,61 +128,6 @@ template <typename T>
    return;
   }
    // End function factorial
-
-/**
- *   Procedure: factorial2()
- *
- *   Computes n!! - the double factorial
- *
- *   For an even integer n , the double factorial is 
- *   the product of all even integers less than or 
- *   equal to n but greater than or equal to 2. 
- *
- *   For an odd integer p , the double factorial is 
- *   the product of all odd integers less than or equal 
- *   to p and greater than or equal to 1. 
- *
- *   The double factorial values of 0 and -1 are 
- *   defined as equal to 1. Double factorial values 
- *   for integers less than -1 are not defined.
- * 
- */
-template <typename T> 
-   typename
-      std::enable_if<std::is_floating_point<T>::value,T>::type
-   factorial2(unsigned int n)
-  {
-   T fact2 = 1.0e+00;
-
-   switch(n)
-     {
-      case  0:
-      case  1:
-              break;
-
-      case  2:
-              fact2 = 2.0e+00;
-              break;
-
-      case  3:
-              fact2 = 3.0e+00;
-              break;
-
-      case  4:
-              fact2 = 8.0e+00;
-              break;
-
-      default:
-              for(int i=n; i>1; i=i-2)
-                 {
-                  fact2 = fact2 * ( static_cast<T>(i) );
-                 }
-              break;
-     }
-
-   return fact2;
-  }
-   // End of factorial2()
 
 /**
  *   lentz_cfrac()  
@@ -796,11 +743,11 @@ template <typename T>
    //     are outside of [-1,+1]
    //
 
-   double const xsquared = x*x;
+   T const xsquared = x*x;
 
-   double const bracket  = 1.0e+00 - xsquared;
+   T const bracket  = 1.0e+00 - xsquared;
 
-   double const s_fac = std::signbit(bracket) ? -1.0e+00 : 1.0e+00;
+   T const s_fac = std::signbit(bracket) ? -1.0e+00 : 1.0e+00;
 
    if(std::signbit(bracket))
      {
@@ -828,7 +775,7 @@ template <typename T>
  
    //
 
-   double const smallest = 1.0e+04 * std::numeric_limits<double>::min(); 
+   T const smallest = 1.0e+04 * std::numeric_limits<T>::min(); 
 
    //
    //---- Dimension qlm_array correctly
@@ -852,7 +799,7 @@ template <typename T>
 
    int m = 0;
 
-   double CFL = 0.0e+00;
+   T CFL = 0.0e+00;
 
    lentz_cfrac(&CFL, x, lmax, m);
 
@@ -880,7 +827,7 @@ template <typename T>
 
    for(int ll=lmax-2; ll>=0; --ll)
       {
-       double ftemp = (n2*x*qlm_array[ll+1][0]) + (n1*qlm_array[ll+2][0]);
+       T ftemp = (n2*x*qlm_array[ll+1][0]) + (n1*qlm_array[ll+2][0]);
 
        qlm_array[ll][0] = ftemp/n3;
 
@@ -893,11 +840,11 @@ template <typename T>
    //---- Renormalize using known value of Q_00 
    //
      
-   double const log_factor      = log(x + 1.0e+00) - log( std::abs(x - 1.0e+00) );
+   T const log_factor      = std::log(x + 1.0e+00) - std::log( std::abs(x - 1.0e+00) );
 
-   double const half_log_factor = 0.5e+00 * log_factor;
+   T const half_log_factor = 0.5e+00 * log_factor;
 
-   double const scale_factor    = half_log_factor/qlm_array[0][0];
+   T const scale_factor    = half_log_factor/qlm_array[0][0];
 
    //
 
@@ -937,7 +884,7 @@ template <typename T>
 
    for(int ll=lmax-2; ll>=0; --ll)
       {
-       double const ftemp = (n2*x*qlm_array[ll+1][1]) + (n1*qlm_array[ll+2][1]);
+       T const ftemp = (n2*x*qlm_array[ll+1][1]) + (n1*qlm_array[ll+2][1]);
 
        qlm_array[ll][1] = ftemp / n3;
              
@@ -950,11 +897,11 @@ template <typename T>
    //---- Renormalize using known value of first member.
    //
           
-   double const root     = sqrt ( s_fac * bracket );
+   T const root     = std::sqrt ( s_fac * bracket );
 
-   double const Q_01     = -1.0e+00/root;
+   T const Q_01     = -1.0e+00/root;
 
-   double const scale_factor_m_1 = Q_01 / qlm_array[0][1];
+   T const scale_factor_m_1 = Q_01 / qlm_array[0][1];
       
    for(int ll=0; ll<=lmax; ++ll)
       {
@@ -970,29 +917,29 @@ template <typename T>
    //---- For each l value, step up in m
    //
 
-   double const factor = sqrt( s_fac * bracket );
+   T const factor = std::sqrt( s_fac * bracket );
 
-   double const factor_inv_bracket  = 1.0e+00/factor;
+   T const factor_inv_bracket  = 1.0e+00/factor;
 
    for(int ll=0; ll<=lmax; ++ll)
       {   
        for(int m = 1; m<mmax; ++m)
           {
            //
-           //.... Factor in front of Qlm = -2 m / sqrt( sign (1 - x^2 ) )
+           //.... Factor in front of Qlm = -2 m / std::sqrt( sign (1 - x^2 ) )
            //
 
-           double const factor_Qlm    = -2.0e+00 * ((double) m) * factor_inv_bracket;
+           T const factor_Qlm    = -2.0e+00 * (static_cast<double>(m)) * factor_inv_bracket;
 
-           double const term1 = factor_Qlm * x * qlm_array[ll][m];
+           T const term1 = factor_Qlm * x * qlm_array[ll][m];
 
            //
            //.... Factor in front of Ql{m-1} = - ( sign (1 - x^2 ) ) (l + m)(l - m + 1)
            //
 
-           double const factor_Q_lm_1 = -s_fac * ( (double) ( (ll + m) * (ll - m + 1) ) );
+           T const factor_Q_lm_1 = -s_fac * ( static_cast<double>( (ll + m) * (ll - m + 1) ) );
 
-           double const term2 = factor_Q_lm_1 * qlm_array[ll][m-1];
+           T const term2 = factor_Q_lm_1 * qlm_array[ll][m-1];
 
            //  
            //.... Apply forward recursion formula
@@ -1372,8 +1319,6 @@ template <typename T>
 
    std::complex<T> zsum = zwlmro * zpow;
 
-   //std::cout << "     Debug: outside loop - power of z (lm) = " << lm << "\n";
-
    //
    //---- Now deal with terms ir = 1, 2, ... lm2 - indeed if any 
    //                                  
@@ -1403,10 +1348,6 @@ template <typename T>
        zwlmr.real(wlmr); zwlmr.imag(0.0e+00);
 
        //
-
-       //std::cout << "     Debug: inside  loop - ir = " << ir 
-       //          << " power of z (lmir) = " << lmir 
-       //          << "\n";
 
        std::complex<T> const zpowterm = power_complx_to_unsigned_int<T>(z,lmir);
 
@@ -1457,275 +1398,6 @@ template <typename T>
    return;
   }
    // End function cplm 
-
-
-/**
- *   Procedure: printRectangularQlmMat()
- *
- *   Prints a matrix of Qlm values stored in rectangular form.
- *
- *   Typically this is a set of Q_lm functions computed at one argument
- *
- *   Rows are 0 to lmax
- *
- *   Cols are 0 to mmax
- * 
- *   Storage assumed std::vector<std::vector<T> > 
- * 
- *   T can be  float, double or long double
- *
- */
-template <typename T> void printRectangularQlmMat(int const lmax,
-                                                  int const mmax,
-                                                  std::vector<std::vector<T> > const &mat)
-  {
-   std::ostringstream os;
-
-   //
-   //---- Header on job log 
-   //
-
-   std::ios_base::fmtflags old_settings = std::cout.flags();
-
-   os.str(""); os.clear();
-
-   os << "\n\n"             
-      << "     Printing Rectangular matrix of Qlm functions  "
-      << "\n\n" 
-      << "     Number of rows = " << std::fixed << std::setw(5) << lmax + 1 << "\n" 
-      << "     Number of cols = " << std::fixed << std::setw(5) << mmax + 1 
-      << "\n\n";
-   
-   std::cout << os.str() << "\n";
-
-   os.str(""); os.clear();
-
-   std::cout.flags(old_settings);
-
-   //
-   //.... Row of "m=x" accross the top line
-   //
-   //     Each "m" is allocated 6 chars and is set 
-   //     in a box size 13 characters.
-   //
-
-   old_settings = std::cout.flags();
-
-   os.str(""); os.clear();
-
-   os << "          " ;
-
-   for(int mm=0; mm<=mmax; ++mm)
-      {
-       os << "      m =" << std::setw(2) << std::fixed << std::right << mm << "     ";
-      }
-
-   std::cout << os.str() << "\n";
-
-   os.str(""); os.clear();
-
-   std::cout.flags(old_settings);
-
-   //
-   //.... Row of "-----" accross under each "m"
-   //
-
-   old_settings = std::cout.flags();
-
-   os.str(""); os.clear();
-
-   os << "          ";
-
-   for(int mm=0; mm<=mmax; ++mm)
-     {
-      os << " +------------+ ";
-     }
-
-   std::cout << os.str() << "\n";
-
-   os.str(""); os.clear();
-
-   std::cout.flags(old_settings);
-
-   //
-   //.... For each "l" print out the m values 
-   //
-
-   for(int ll=0; ll<=lmax; ++ll)
-      {
-       os.str(""); os.clear();
-
-       os << "     l=" << std::setw(2) << ll << " ";
-
-       for(int mm=0; mm<=mmax; ++mm)
-          {
-           os << " " 
-              << std::scientific << std::setw(14) << std::setprecision(7) 
-              << mat[ll][mm] 
-              << " " ;
-          }
-
-       std::cout << os.str() << "\n";
-      }
-  
-   std::cout.flags(old_settings);
-
-   //
-
-   os.str(""); os.clear();
-
-   os << "\n\n";
-   os << "     **** Completed - printLowerTriangularQlmMat()"; 
-   os << "\n\n";
-
-   std::cout << os.str();
-
-   os.str(""); os.clear();
-
-   //
-   //--- Return point 
-   //
-
-   return;
-  }
-   // End of printRectangularQlmMat()
-
-/**
- *   Procedure: printLowerTriangularPlmMat()
- *
- *   Prints a matrix of regular Plm values stored in lower triangular form.
- *
- *   Typically this is a set of P_lm functions computed at one argument
- *
- *   Rows from 0 to lmax - hence count = lmax+1
- *
- *   Row 0 has 1 element, row 1 has 2 elements etc...
- * 
- *   Storage assumed std::vector<std::vector<T> > 
- * 
- *   T can be  float, double or long double
- *
- */
-template <typename T> void printLowerTriangularPlmMat(std::vector<std::vector<T> > const &triang_mat, 
-                                                      int const lmax)
-  {
-   std::ostringstream os;
-
-   //
-
-   int const mmax = lmax+1;
-
-   //
-   //---- Header on job log 
-   //
-
-   std::ios_base::fmtflags old_settings = std::cout.flags();
-
-   os.str(""); os.clear();
-
-   os << "\n\n"             
-      << "     Printing lower triangular matrix  "
-      << "\n\n" 
-      << "     Number of rows = " << std::fixed << std::setw(5) << lmax + 1 
-      << "\n\n";
-   
-   std::cout << os.str() << "\n";
-
-   os.str(""); os.clear();
-
-   std::cout.flags(old_settings);
-
-   //
-   //.... Row of "m=x" accross the top line
-   //
-   //     Each "m" is allocated 6 chars and is set 
-   //     in a box size 13 characters.
-   //
-
-   old_settings = std::cout.flags();
-
-   os.str(""); os.clear();
-
-   //os << "1234567890" ;
-
-   os << "          " ;
-
-   for(int mm=0; mm<mmax; ++mm)
-      {
-       os << "      m =" << std::setw(2) << std::fixed << std::right << mm << "    ";
-      }
-
-   std::cout << os.str() << "\n";
-
-   os.str(""); os.clear();
-
-   std::cout.flags(old_settings);
-
-   //
-   //.... Row of "-----" accross under each "m"
-   //
-
-   old_settings = std::cout.flags();
-
-   os.str(""); os.clear();
-
-   //os << "1234567890";
-
-   os << "          ";
-
-   for(int mm=0; mm<mmax; ++mm)
-     {
-      os << " +-----------+ ";
-     }
-
-   std::cout << os.str() << "\n";
-
-   os.str(""); os.clear();
-
-   std::cout.flags(old_settings);
-
-   //
-   //.... For each "l" print out the m values 
-   //
-
-   for(int ll=0; ll<=lmax; ++ll)
-      {
-       os.str(""); os.clear();
-
-       os << "     l=" << std::setw(2) << ll << " ";
-
-       for(int mm=0; mm<=ll; ++mm)
-          {
-           os << " " 
-              << std::scientific << std::setw(13) << std::setprecision(7) 
-              << triang_mat[ll][mm] 
-              << " " ;
-          }
-
-       std::cout << os.str() << "\n";
-      }
-  
-   std::cout.flags(old_settings);
-
-   //
-
-   os.str(""); os.clear();
-
-   os << "\n\n";
-   os << "     **** Completed - printLowerTriangularPlmMat()"; 
-   os << "\n\n";
-
-   std::cout << os.str();
-
-   os.str(""); os.clear();
-
-   //
-   //--- Return point 
-   //
-
-   return;
-  }
-   // End of printLowerTrianglarPlmMat() 
 
 #endif // For #ifdef _ASSOC_LEGENDRE_TEMPLATED_REAL_INCLUDE_176492_H_
 
