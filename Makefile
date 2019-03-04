@@ -1,6 +1,6 @@
 #!/bin/make
 
-PROJ_DIR = $(HOME)/specialfunctions
+PROJ_DIR = $(PWD)
 
 PROJ_INC = $(PROJ_DIR)/inc
 
@@ -10,23 +10,15 @@ PROJ_BIN = $(PROJ_DIR)/bin
 
 #
 
-GSL_DIR = $(PROJ_DIR)/third_party/gsl
-
-GSL_INC = $(GSL_DIR)/include 
-
-GSL_LIB = $(GSL_DIR)/lib 
-
-#
-
 CXX = g++
 
-CXXOPTS = -O3 -std=c++0x -v 
+CXXOPTS = -O3 -std=c++0x  
 
 #
 #---- Includes 
 #
 
-INCS = -I$(PROJ_INC) -I$(GSL_INC) 
+INCS = -I$(PROJ_INC) 
 
 #
 #---- Libraries for the linker 
@@ -35,33 +27,29 @@ INCS = -I$(PROJ_INC) -I$(GSL_INC)
 #         incorporated in LD_LIBRARY_PATH
 #
 
-LIBDIRS = -L $(GSL_LIB) 
+LIBDIRS = -L . 
 
-LIBS=-lm -lrt -lgsl -lgslcblas -lpthread  
-
-#
-
-SRCS=$(PROJ_SRC)/assoc_legendre_tests.cxx
-
-EXEC=$(PROJ_BIN)/test.x
+LIBS=-lm -lrt -lpthread  
 
 #
 #---- Build rules 
 #
 
-all: clean test1 test2
+all: clean testreal testcmplx
 
-test1:
+testreal:
 	$(CXX) $(INCS) $(CXXOPTS) $(LIBDIRS) \
-               -o $(PROJ_BIN)/test1.x $(PROJ_SRC)/assoc_legendre_tests.cxx $(LIBS) 
+               -o $(PROJ_BIN)/testreal.x     \
+                  $(PROJ_SRC)/assoc_legendre_tests_real_args.cxx $(LIBS) 
 
-test2:
+testcmplx:
 	$(CXX) $(INCS) $(CXXOPTS) $(LIBDIRS) \
-               -o $(PROJ_BIN)/test2.x $(PROJ_SRC)/test2.cxx $(LIBS) 
+               -o $(PROJ_BIN)/testcmplx.x    \
+                  $(PROJ_SRC)/assoc_legendre_tests_cmplx_args.cxx $(LIBS) 
 
 
 clean:
-	$(RM) -vf *.x *.o 
+	$(RM) -vf $(PROJ_BIN)/*.x *.o 
 
 #
 #---- End of file 
