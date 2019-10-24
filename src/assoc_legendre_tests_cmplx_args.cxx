@@ -19,6 +19,7 @@
 #include <iomanip>
 #include <string>
 #include <sstream>
+#include <typeinfo>
 
 #include <cmath>
 #include <cfenv>
@@ -27,7 +28,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "associated_legendre_functions.hxx"
+#include <associated_legendre_functions_cmplx.hxx>  
   
 #pragma STDC FENV_ACCESS ON  // Enable catching floating point exceptions
 
@@ -79,7 +80,9 @@ int main(int argc, char **argv)
    int const Lmax =  200;
    int const Mmax =  200;
 
-   long double const x = 1.10e+00;
+   std::complex<long double> zarg;
+ 
+   zarg.real(2.00e+00); zarg.imag(0.0e+00);
 
    //======================================================================
    //
@@ -87,44 +90,54 @@ int main(int argc, char **argv)
    //
    //======================================================================
 
-   for(int m=0; m<=Mmax; ++m)
+   std::vector<std::vector<std::complex<long double> > > plm_mat;
+
+   plm_mat.resize(Lmax+1);
+
+   for(int l=0; l<=Lmax; ++l)
       {
-       printf("\n\n");
-       printf("     Computing regular associated Legendre functions \n");
-       printf("     for m = %d and l in the range [%d,%d] ", m,m,Lmax);
+       plm_mat[l].resize(l+1);
+      }
 
-       //
+   std::feclearexcept(FE_ALL_EXCEPT);
 
-       std::vector<long double> plm_vec;
+   complex_unnormalized_assoc_regular_legendre((unsigned int) Lmax,
+                                               (unsigned int) Mmax,
+                                               zarg,
+                                               plm_mat);
 
-       plm_vec.resize(Lmax+1);
+   monitor_fl_pt_exceptions();
 
-       //
-       //..... Compute for l=m, ...., Lmax
-       //
+   //
 
-       std::feclearexcept(FE_ALL_EXCEPT);
+   printf("\n\n");
+   printf("     Computed associated Legendre functions of the first kind (regular)");
+   printf("\n\n");
+   printf("      l    m        z        Associated Legendre function \n");
+   printf("     ---  ---  ------------- ---------------------------- \n");
 
-       unnormalised_associated_regular_Legendre(Lmax,m,x,plm_vec);
+   std::string cformat_str = " ";
 
-       monitor_fl_pt_exceptions();
-
-       //
-
-       printf("\n\n");
-       printf("     Real argument (x) = %15.6Lf ", x);
-       printf("\n\n");
-       printf("     Computed associated Legendre functions of the first kind (regular)");
-       printf("\n\n");
-       printf("      l    m        x        Associated Legendre function \n");
-       printf("     ---  ---  ------------- ---------------------------- \n");
-
-       for(int l=m; l<=Lmax; ++l)
+   for(int l=0; l<=Lmax; ++l)
+      {
+       for(int m=0; m<=l; ++m)
           {
-           printf("     %3d  %3d  %15.6Le       %15.6Le \n", l, m, x, plm_vec[l]);
+           long double const xarg = zarg.real();
+           long double const yarg = zarg.imag();
+
+           //
+
+           std::complex<long double> const zplm = plm_mat[l][m];
+
+           long double const xplm = zplm.real();
+           long double const yplm = zplm.imag();
+
+           printf("     %3d  %3d  (%15.6Le,%15.6Le)   (%15.6Le, %15.6Le) \n", 
+                   l, m, 
+                   xarg, yarg, 
+                   xplm, yplm);
           }
       }
-       // End loop over m values 
 
    //======================================================================
    //
@@ -134,14 +147,11 @@ int main(int argc, char **argv)
 
    printf("\n\n");
    printf("     Computing regular associated Legendre functions \n");
-   printf("     for m in range [%d,%d] and l in the range [%d,%d] ", 
-           0,Mmax, 0,Lmax);
+   printf("     for m in range [%d,%d] and l in the range [%d,%d] ", 0,Mmax, 0,Lmax);
 
    //
-   //---- Create rectangular storage
-   //
 
-   std::vector<std::vector<long double> > qlm_mat;
+   std::vector<std::vector<std::complex<long double> > > qlm_mat;
 
    qlm_mat.resize(Lmax+1);
 
@@ -154,25 +164,30 @@ int main(int argc, char **argv)
 
    std::feclearexcept(FE_ALL_EXCEPT);
 
-   unnormalised_associated_irregular_Legendre_big_arg(Lmax,Mmax,x,qlm_mat);
+   complex_unnormalized_assoc_irregular_legendre(Lmax,Mmax,zarg,qlm_mat);
 
    monitor_fl_pt_exceptions();
 
    //
 
    printf("\n\n");
-   printf("     Real argument (x) = %15.6Lf ", x);
+   printf("     Complex argument (z) = (%15.6Lf,%15.6Lf) ", zarg.real(), zarg.imag());
    printf("\n\n");
    printf("     Computed associated Legendre functions of the second kind (irregular)");
    printf("\n\n");
-   printf("      l    m        x        Associated Legendre function \n");
+   printf("      l    m        z        Associated Legendre function \n");
    printf("     ---  ---  ------------- ---------------------------- \n");
 
    for(int ll=0; ll<=Lmax; ++ll)
       {
        for(int mm=0; mm<=Mmax; ++mm)
           {
-           printf("     %3d  %3d  %15.6Le       %15.6Le \n", ll, mm, x, qlm_mat[ll][mm]);
+           printf("     %3d  %3d  (%15.6Le,%15.6Le)   (%15.6Le,%15.6Le) \n", 
+                   ll, mm, 
+                   zarg.real(), 
+                   zarg.imag(),
+                   qlm_mat[ll][mm].real(), 
+                   qlm_mat[ll][mm].imag());
           }
       }
 

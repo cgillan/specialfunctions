@@ -27,7 +27,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "associated_legendre_functions.hxx"
+#include "associated_legendre_functions_real.hxx"
   
 #pragma STDC FENV_ACCESS ON  // Enable catching floating point exceptions
 
