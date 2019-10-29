@@ -71,16 +71,87 @@ int main(int argc, char **argv)
    printf("         epsilon       : %13.7Le \n", std::numeric_limits<long double>::epsilon());
    printf("\n");
 
-   //
-   //---- Set the maximum L and M and argument "x"  
-   //
-
-   int const Lmax =  200;
-   int const Mmax =  200;
-
    std::complex<long double> zarg;
  
    zarg.real(2.00e+00); zarg.imag(0.0e+00);
+
+   //
+
+   std::string cformat_type_str = " ";
+
+   if(typeid(zarg) == typeid( std::complex<float>(0.0,1.0) ) )
+     {
+      cformat_type_str = "     Data type for complex argument is: float. \n\n     File name = %s";
+     }
+   else if(typeid(zarg) == typeid( std::complex<double>(0.0,1.0) ) )
+     {
+      cformat_type_str = "     Data type for complex argument is: double. \n\n     File name = %s";
+     }
+   else if(typeid(zarg) == typeid( std::complex<long double>(0.0,1.0) ) )
+     {
+      cformat_type_str = "     Data type for complex argument is: long double. \n\n     File name = %s";
+     }
+   else
+     {
+      printf("\n\n");
+      printf("     **** Error: Type for the complex argument is unknown");
+      printf("\n\n");
+
+      exit(0);
+     }
+
+   printf(cformat_type_str.c_str(), __FILE__);
+   printf("\n\n");
+
+   //======================================================================
+   //
+   //     T E S T E D   V A L U E S 
+   //
+   //======================================================================
+   //
+   //---- Following are selected values from the tables of Zhang and Jin
+   //
+   //     See pages 118 and following of their book.
+   //
+
+   std::vector<int> l_vec_test { 1, 2, 3, 10, 2, 3, 4, 10, 3, 4, 5, 10, 4, 5, 6 };
+   std::vector<int> m_vec_test { 1, 1, 1,  1, 2, 3, 2,  2, 3, 3, 3,  3, 4, 4, 4 };
+
+   //
+   //---- Set the maximum L and M and argument "z"  
+   //
+
+   auto iter_max_l = std::max_element(std::begin(l_vec_test), std::end(l_vec_test)); 
+   auto iter_max_m = std::max_element(std::begin(m_vec_test), std::end(m_vec_test)); 
+
+   int const Ltemp = *iter_max_l;
+   int const Mtemp = *iter_max_m;
+
+   printf("     List of l,m values to be tested at each argument");
+   printf("\n\n");
+   printf("     Index    l      m   \n");
+   printf("     -----  -----  ----- \n");
+
+   for(int i=0; i<l_vec_test.size(); ++i)
+      {
+       printf("     %5d  %5d  %5d  \n", i+1, l_vec_test[i], m_vec_test[i]);
+      }
+   
+   printf("\n\n");
+   printf("      Maximum L value in test list = %4d \n", Ltemp);
+   printf("      Maximum M value              = %4d \n", Mtemp);
+   printf("\n\n");
+
+   //
+   //---- Given the way that the routines work with triangles and 
+   //     matrices, we find the largest of the two l,m and dimension
+   //     with that 
+   //
+
+   int const Itemp = std::max(Ltemp,Mtemp);
+
+   int const Lmax = Itemp;
+   int const Mmax = Itemp;
 
    //======================================================================
    //
@@ -107,34 +178,52 @@ int main(int argc, char **argv)
    monitor_fl_pt_exceptions();
 
    //
+   //---- Print out the results 
+   //
+
+   std::string cformat_plm_str = " ";
+
+   if(typeid(zarg) == typeid( std::complex<float>(0.0,1.0) ) )
+     {
+      cformat_plm_str = "     %3d  %3d  (%15.6e,%15.6e)   (%15.6e, %15.6e) \n"; 
+     }
+   else if(typeid(zarg) == typeid( std::complex<double>(0.0,1.0) ) )
+     {
+      cformat_plm_str = "     %3d  %3d  (%15.6e,%15.6e)   (%15.6e, %15.6e) \n"; 
+     }
+   else if(typeid(zarg) == typeid( std::complex<long double>(0.0,1.0) ) )
+     {
+      cformat_plm_str = "     %3d  %3d  (%15.6Le,%15.6Le)   (%15.6Le, %15.6Le) \n"; 
+     }
+   else
+     {
+      printf("\n\n");
+      printf("     **** Error: Type for the complex argument is unknown");
+      printf("\n\n");
+     }
 
    printf("\n\n");
    printf("     Computed associated Legendre functions of the first kind (regular)");
    printf("\n\n");
-   printf("      l    m           Argument (z)                  Associated Legendre function \n");
-   printf("     ---  ---  ---------------------------------  --------------------------------- \n");
+   printf("      l    m           Argument (z)                   Associated Legendre function    \n");
+   printf("     ---  ---  ---------------------------------   ---------------------------------- \n");
 
-   std::string cformat_str = " ";
-
-   for(int l=0; l<=Lmax; ++l)
+   for(int i=0; i<l_vec_test.size(); ++i)
       {
-       for(int m=0; m<=l; ++m)
-          {
-           long double const xarg = zarg.real();
-           long double const yarg = zarg.imag();
+       int const l = l_vec_test[i];
+       int const m = m_vec_test[i];
 
-           //
+       long double const xarg = zarg.real();
+       long double const yarg = zarg.imag();
 
-           std::complex<long double> const zplm = plm_mat[l][m];
+       //
 
-           long double const xplm = zplm.real();
-           long double const yplm = zplm.imag();
+       std::complex<long double> const zplm = plm_mat[l][m];
 
-           printf("     %3d  %3d  (%15.6Le,%15.6Le)   (%15.6Le, %15.6Le) \n", 
-                   l, m, 
-                   xarg, yarg, 
-                   xplm, yplm);
-          }
+       long double const xplm = zplm.real();
+       long double const yplm = zplm.imag();
+
+       printf(cformat_plm_str.c_str(), l, m, xarg, yarg, xplm, yplm);
       }
 
    //======================================================================
@@ -142,12 +231,6 @@ int main(int argc, char **argv)
    //     I R R E G U L A R   L E G E N D R E   F U N C T I O N S
    //
    //======================================================================
-
-   printf("\n\n");
-   printf("     Computing regular associated Legendre functions \n");
-   printf("     for m in range [%d,%d] and l in the range [%d,%d] ", 0,Mmax, 0,Lmax);
-
-   //
 
    std::vector<std::vector<std::complex<long double> > > qlm_mat;
 
@@ -167,26 +250,54 @@ int main(int argc, char **argv)
    monitor_fl_pt_exceptions();
 
    //
+   //---- Print out the results 
+   //
 
-   printf("\n\n");
-   printf("     Complex argument (z) = (%15.6Lf,%15.6Lf) ", zarg.real(), zarg.imag());
+   std::string cformat_qlm_str = " ";
+
+   if(typeid(zarg) == typeid( std::complex<float>(0.0,1.0) ) )
+     {
+      cformat_qlm_str = "     %3d  %3d  (%15.6e,%15.6e)   (%15.6e, %15.6e) \n"; 
+     }
+   else if(typeid(zarg) == typeid( std::complex<double>(0.0,1.0) ) )
+     {
+      cformat_qlm_str = "     %3d  %3d  (%15.6e,%15.6e)   (%15.6e, %15.6e) \n"; 
+     }
+   else if(typeid(zarg) == typeid( std::complex<long double>(0.0,1.0) ) )
+     {
+      cformat_qlm_str = "     %3d  %3d  (%15.6Le,%15.6Le)   (%15.6Le, %15.6Le) \n"; 
+     }
+   else
+     {
+      printf("\n\n");
+      printf("     **** Error: Type for the complex argument is unknown");
+      printf("\n\n");
+     }
+
    printf("\n\n");
    printf("     Computed associated Legendre functions of the second kind (irregular)");
    printf("\n\n");
-   printf("      l    m        z        Associated Legendre function \n");
-   printf("     ---  ---  ------------- ---------------------------- \n");
+   printf("      l    m           Argument (z)                   Associated Legendre function    \n");
+   printf("     ---  ---  ---------------------------------   ---------------------------------- \n");
 
-   for(int ll=0; ll<=Lmax; ++ll)
+   for(int i=0; i<l_vec_test.size(); ++i)
       {
-       for(int mm=0; mm<=Mmax; ++mm)
-          {
-           printf("     %3d  %3d  (%15.6Le,%15.6Le)   (%15.6Le,%15.6Le) \n", 
-                   ll, mm, 
-                   zarg.real(), 
-                   zarg.imag(),
-                   qlm_mat[ll][mm].real(), 
-                   qlm_mat[ll][mm].imag());
-          }
+       int const ll = l_vec_test[i];
+       int const mm = m_vec_test[i];
+
+       long double const xarg = zarg.real();
+       long double const yarg = zarg.imag();
+
+       //
+
+       std::complex<long double> const zqlm = qlm_mat[ll][mm];
+
+       long double const xqlm = zqlm.real();
+       long double const yqlm = zqlm.imag();
+
+       //
+
+       printf(cformat_qlm_str.c_str(), ll, mm, xarg, yarg, xqlm, yqlm);
       }
 
    //

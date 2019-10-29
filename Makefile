@@ -79,7 +79,7 @@ testcmplx:
                   $(PROJ_SRC)/assoc_legendre_tests_cmplx_args.cxx $(LIBS) 
 
 clean:
-	$(RM) -vf $(PROJ_BIN)/*.x $(PROJ_SRC)/*.o $(PROJ_SRC)/*.a 
+	$(RM) -vf $(PROJ_BIN)/*.x $(PROJ_SRC)/*.o $(PROJ_LIB)/*.a 
 
 #
 #---- End of file 

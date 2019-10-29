@@ -269,7 +269,7 @@ template <typename T>
         }
       else if( typeid(T) == typeid(long double) )
         {
-         cformat_str = "      Absolute value of z = %13.6f ";
+         cformat_str = "      Absolute value of z = %13.6Lf ";
         }
 
       printf(cformat_str.c_str(), zabs);

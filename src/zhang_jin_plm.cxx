@@ -41,8 +41,6 @@
 #include <algorithm>
 #include <complex>
 #include <cstdint>
-
-//#include "associated_legendre_functions.hxx"
   
 void complex_unnormalized_assoc_regular_legendre(
            unsigned int const m, 
@@ -65,9 +63,9 @@ void complex_unnormalized_assoc_irregular_legendre(
 
 int main(int argc, char **argv)
   {
-   int const Lmax = 5;
+   int const Lmax = 10;
 
-   int const Mmax = 5;
+   int const Mmax = 10;
 
    std::complex<double> z;
 
@@ -122,7 +120,7 @@ int main(int argc, char **argv)
 
    //
 
-   z.real(2.5e+00); z.imag(0.0e+00);
+   z.real(2.0e+00); z.imag(0.0e+00);
 
    //
    //---- Clear all floating point exceptions
@@ -215,7 +213,7 @@ int main(int argc, char **argv)
 
    //
 
-   z.real(2.5e+00); z.imag(0.0e+00);
+   z.real(2.0e+00); z.imag(0.0e+00);
 
    //
 
