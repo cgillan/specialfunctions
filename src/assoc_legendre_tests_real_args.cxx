@@ -29,9 +29,7 @@
 
 #include "associated_legendre_functions_real.hxx"
   
-#pragma STDC FENV_ACCESS ON  // Enable catching floating point exceptions
-
-static void monitor_fl_pt_exceptions();
+#include "monitor_fl_pt_exceptions.hxx"
 
 /**
  *   Main program - test harness
@@ -187,72 +185,6 @@ int main(int argc, char **argv)
    return 0;
   }
    // End of main
-
-/**
- *   monitor_fl_pt_exceptions()
- *
- *   Test current state of the floating point flags and report
- *   to the job log
- * 
- *   Before calling the code to be monitored, all floating point 
- *   exceptions whould be cleared by calling 
- *
- *     std::feclearexcept(FE_ALL_EXCEPT);
- *
- *   This routine can be called after the critial code to 
- *   report on what happened.  
- *
- */
-static void monitor_fl_pt_exceptions()
-  {
-   printf("\n\n");
-   printf("     Reporting status of floating point exception flags.");
-   printf("\n\n");
-
-   if(std::fetestexcept(FE_ALL_EXCEPT))
-     {
-      if(std::fetestexcept(FE_DIVBYZERO)) 
-        {
-         printf("     **** Division by zero reported");
-         printf("\n");
-        }
-
-      if(std::fetestexcept(FE_INEXACT)) 
-        {
-         printf("     **** Inexact computation ");
-         printf("\n");
-        }
-
-      if(std::fetestexcept(FE_INVALID)) 
-        {
-         printf("     **** Invalid computation ");
-         printf("\n");
-        }
-
-      if(std::fetestexcept(FE_OVERFLOW)) 
-        {
-         printf("     **** Overflow reported ");
-         printf("\n");
-        }
-
-      if(std::fetestexcept(FE_UNDERFLOW)) 
-        {
-         printf("     **** Underflow reported ");
-         printf("\n");
-        }
-     }
-   else
-     {
-      printf("     No floating point exception flags are set.");
-      printf("\n");
-     }
-      // End of test on floating point exceptions being raised
-
-   //
-
-   return;
-  }
-   // End of monitor_fl_pt_exceptions()
 
 //************************************************************************
 //************************************************************************

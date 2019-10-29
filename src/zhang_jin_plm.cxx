@@ -4,7 +4,7 @@
 //   File: zhang_jin.cxx  
 //
 //   This file implements the equations for the computation of
-//   associated Legendre polynamicals of the first and second 
+//   associated Legendre polynomials of the first and second 
 //   kind of integer order (l) and degree (m) and complex 
 //   argument (z), as defined in the book 
 //
