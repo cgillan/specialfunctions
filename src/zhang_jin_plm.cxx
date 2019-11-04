@@ -236,12 +236,16 @@ int main(int argc, char **argv)
    printf("     index  l    m               z                        |z|        Associated Legendre function \n");
    printf("     ----- ---  ---  ------------------------------  -------------  ----------------------------- \n");
 
+   int indxq = 0;
+
    for(int m=0; m<=Mmax; ++m)
       {
        for(int l=0; l<=Lmax; ++l)
           {
+           ++indxq;
+
            printf("     %5d %3d  %3d  (%13.6e, %13.6e)  %13e  (%13e,%13e) \n",  
-             0, l, m, 
+             indxq, l, m, 
              z.real(), z.imag(),  
              std::abs(z),
               cqmvec[l][m].real(), cqmvec[l][m].imag());
@@ -765,11 +769,11 @@ void complex_unnormalized_assoc_irregular_legendre(
    std::complex<double> zcq0; 
 
    {
-    std::complex<double> z_plus_1  = z + ZONE; 
+    std::complex<double> one_plus_z  = ZONE + z; 
 
-    std::complex<double> z_minus_1 = z - ZONE;
+    std::complex<double> one_minus_z = ZONE - z;
 
-    std::complex<double> ztemp1 = z_plus_1 / z_minus_1;
+    std::complex<double> ztemp1 = one_plus_z / one_minus_z;
 
     std::complex<double> ztemp2 = zls_factor * ztemp1;
 
@@ -822,7 +826,7 @@ void complex_unnormalized_assoc_irregular_legendre(
 */
    
    //
-   //---- 
+   //---- Computation for z lying outside the unit circle  
    //
 
    if(z_outside_unit_circle)
@@ -915,6 +919,8 @@ void complex_unnormalized_assoc_irregular_legendre(
 
           std::complex<double> znumerator = znumerator1 - znumerator2;
 
+          //printf("  znumerator = ( %13.6e, %13.6e ) \n", znumerator.real(), znumerator.imag());
+
           //
           //.... Compute the denominator of equation (4.5.10)
           //
@@ -930,6 +936,8 @@ void complex_unnormalized_assoc_irregular_legendre(
 
           std::complex<double> zdenominator = zk_plus_one;
 
+          //printf("  zdenominator = ( %13.6e, %13.6e ) \n", zdenominator.real(), zdenominator.imag());
+
           //
           //.... All the parts are in place
           //
@@ -941,8 +949,12 @@ void complex_unnormalized_assoc_irregular_legendre(
 
           zcqf0 = znumerator / zdenominator;
 
+          //printf("  k=%d, lmax=%d, zcqf0 = ( %13.6e, %13.6e ) \n", k, lmax, zcqf0.real(), zcqf0.imag());
+
           if( k <= lmax ) 
             {
+             //printf("   Setting zcqmvec[%d][0] equals zcqf0 \n", k);
+
              zcqmvec[k][0] = zcqf0;
             }
 
@@ -967,11 +979,15 @@ void complex_unnormalized_assoc_irregular_legendre(
 
       std::complex<double> zfactor = zcq0 / zcqf0; 
 
+      //printf("   Multiplying all zcqmvec[k][0] by factor = ( %13.6e, %13.6e ) \n", zfactor.real(), zfactor.imag());
+
       for(int k=0; k<=lmax; ++k)
          {
           std::complex<double> ztemp = zcqmvec[k][0] * zfactor; 
 
           zcqmvec[k][0] = ztemp; 
+
+          //printf("  Setting - zcqmvec[%d][0] = ( %13.6e, %13.6e ) \n", k, ztemp.real(), ztemp.imag());
          }
 
       //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -1123,7 +1139,7 @@ void complex_unnormalized_assoc_irregular_legendre(
           std::complex<double> zcq0 = zcqmvec[lval][0];
           std::complex<double> zcq1 = zcqmvec[lval][1];
 
-          for(int mval=2; mval<=mmax; ++mval)
+          for(int mval=0; mval<=(mmax-2); ++mval)
              {
               //
               //.... First term in the recursion of (4.4.10)
@@ -1132,13 +1148,15 @@ void complex_unnormalized_assoc_irregular_legendre(
               std::complex<double> zterm_first = ZERO;
 
               {
-               double const dmval_plus_1 = static_cast<double>(mval - 1);
+               double const dmval_plus_1 = static_cast<double>(mval + 1);
 
                double const dtemp11      = -2.0e+00 * dmval_plus_1;  
 
                std::complex<double> ztemp11;
 
                ztemp11.real(dtemp11); ztemp11.imag(0.0e+00);
+
+               //
 
                std::complex<double> ztemp12 = ztemp11 * z;
 
@@ -1156,10 +1174,10 @@ void complex_unnormalized_assoc_irregular_legendre(
 
               {
                double const dlval_plus_mval_minus_1 
-                              = static_cast<double>(lval + mval + 1);
+                              = static_cast<double>(lval - mval);
 
                double const dlval_minus_mval_plus_2
-                              = static_cast<double>(lval - mval + 2);
+                              = static_cast<double>(lval + mval + 1);
 
                double const dtemp21 = dlval_plus_mval_minus_1 * 
                                         dlval_minus_mval_plus_2;
@@ -1178,9 +1196,9 @@ void complex_unnormalized_assoc_irregular_legendre(
               //     Note that its a subtraction
               //
 
-              std::complex<double> zcqf = zterm_first - zterm_second;
+              std::complex<double> zcqf = zterm_first + zterm_second;
 
-              zcqmvec[lval][mval] = zcqf;
+              zcqmvec[lval][mval+2] = zcqf;
 
               //
               //.... Push down the values for the next term
