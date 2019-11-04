@@ -105,36 +105,43 @@ int main(int argc, char **argv)
 
    //======================================================================
    //
+   //     R E G U L A R   L E G E N D R E   F U N C T I O N S
+   //
    //     T E S T E D   V A L U E S 
    //
    //======================================================================
    //
+   //---- Begin scoping for P(l,m) tests
+   //
+
+   {
+
    //---- Following are selected values from the tables of Zhang and Jin
    //
    //     See pages 118 and following of their book.
    //
 
-   std::vector<int> l_vec_test { 1, 2, 3, 10, 2, 3, 4, 10, 3, 4, 5, 10, 4, 5, 6 };
-   std::vector<int> m_vec_test { 1, 1, 1,  1, 2, 3, 2,  2, 3, 3, 3,  3, 4, 4, 4 };
+   std::vector<int> l_vec_test_p { 1, 2, 3, 10, 2, 3, 4, 10, 3, 4, 5, 10, 4, 5, 6 };
+   std::vector<int> m_vec_test_p { 1, 1, 1,  1, 2, 3, 2,  2, 3, 3, 3,  3, 4, 4, 4 };
 
    //
    //---- Set the maximum L and M and argument "z"  
    //
 
-   auto iter_max_l = std::max_element(std::begin(l_vec_test), std::end(l_vec_test)); 
-   auto iter_max_m = std::max_element(std::begin(m_vec_test), std::end(m_vec_test)); 
+   auto iter_max_l = std::max_element(std::begin(l_vec_test_p), std::end(l_vec_test_p)); 
+   auto iter_max_m = std::max_element(std::begin(m_vec_test_p), std::end(m_vec_test_p)); 
 
    int const Ltemp = *iter_max_l;
    int const Mtemp = *iter_max_m;
 
-   printf("     List of l,m values to be tested at each argument");
+   printf("     List of P(l,m) values to be tested at each argument");
    printf("\n\n");
    printf("     Index    l      m   \n");
    printf("     -----  -----  ----- \n");
 
-   for(int i=0; i<l_vec_test.size(); ++i)
+   for(int i=0; i<l_vec_test_p.size(); ++i)
       {
-       printf("     %5d  %5d  %5d  \n", i+1, l_vec_test[i], m_vec_test[i]);
+       printf("     %5d  %5d  %5d  \n", i+1, l_vec_test_p[i], m_vec_test_p[i]);
       }
    
    printf("\n\n");
@@ -153,11 +160,7 @@ int main(int argc, char **argv)
    int const Lmax = Itemp;
    int const Mmax = Itemp;
 
-   //======================================================================
    //
-   //     R E G U L A R   L E G E N D R E   F U N C T I O N S
-   //
-   //======================================================================
 
    std::vector<std::vector<std::complex<long double> > > plm_mat;
 
@@ -208,10 +211,12 @@ int main(int argc, char **argv)
    printf("      l    m           Argument (z)                   Associated Legendre function    \n");
    printf("     ---  ---  ---------------------------------   ---------------------------------- \n");
 
-   for(int i=0; i<l_vec_test.size(); ++i)
+   for(int i=0; i<l_vec_test_p.size(); ++i)
       {
-       int const l = l_vec_test[i];
-       int const m = m_vec_test[i];
+       int const l = l_vec_test_p[i];
+       int const m = m_vec_test_p[i];
+
+       if(m > l) continue; // Q_lm can have m > l but not P_lm.
 
        long double const xarg = zarg.real();
        long double const yarg = zarg.imag();
@@ -226,11 +231,68 @@ int main(int argc, char **argv)
        printf(cformat_plm_str.c_str(), l, m, xarg, yarg, xplm, yplm);
       }
 
+   //
+
+   }  
+
+   // End of  scoping for P(l,m) tests
+
    //======================================================================
    //
    //     I R R E G U L A R   L E G E N D R E   F U N C T I O N S
    //
    //======================================================================
+   //
+   //---- Begin scoping for Q(l,m) tests
+   //
+
+   {
+
+   //---- Following are selected values from the tables of Zhang and Jin
+   //
+   //     See pages 118 and following of their book.
+   //
+
+   std::vector<int> l_vec_test_q {  0, 1, 2, 10, 0, 1, 2, 10, 0, 1, 2, 10, 0, 1, 2, 10 };
+   std::vector<int> m_vec_test_q {  1, 1, 1,  1, 2, 2, 2,  2, 3, 3, 3,  3, 4, 4, 4,  4 };
+
+   //
+   //---- Set the maximum L and M and argument "z"  
+   //
+
+   auto iter_max_l = std::max_element(std::begin(l_vec_test_q), std::end(l_vec_test_q)); 
+   auto iter_max_m = std::max_element(std::begin(m_vec_test_q), std::end(m_vec_test_q)); 
+
+   int const Ltemp = *iter_max_l;
+   int const Mtemp = *iter_max_m;
+
+   printf("     List of Q(l,m) values to be tested at each argument");
+   printf("\n\n");
+   printf("     Index    l      m   \n");
+   printf("     -----  -----  ----- \n");
+
+   for(int i=0; i<l_vec_test_q.size(); ++i)
+      {
+       printf("     %5d  %5d  %5d  \n", i+1, l_vec_test_q[i], m_vec_test_q[i]);
+      }
+   
+   printf("\n\n");
+   printf("      Maximum L value in test list = %4d \n", Ltemp);
+   printf("      Maximum M value              = %4d \n", Mtemp);
+   printf("\n\n");
+
+   //
+   //---- Given the way that the routines work with triangles and 
+   //     matrices, we find the largest of the two l,m and dimension
+   //     with that 
+   //
+
+   int const Itemp = std::max(Ltemp,Mtemp);
+
+   int const Lmax = Itemp;
+   int const Mmax = Itemp;
+
+   //
 
    std::vector<std::vector<std::complex<long double> > > qlm_mat;
 
@@ -280,10 +342,10 @@ int main(int argc, char **argv)
    printf("      l    m           Argument (z)                   Associated Legendre function    \n");
    printf("     ---  ---  ---------------------------------   ---------------------------------- \n");
 
-   for(int i=0; i<l_vec_test.size(); ++i)
+   for(int i=0; i<l_vec_test_q.size(); ++i)
       {
-       int const ll = l_vec_test[i];
-       int const mm = m_vec_test[i];
+       int const ll = l_vec_test_q[i];
+       int const mm = m_vec_test_q[i];
 
        long double const xarg = zarg.real();
        long double const yarg = zarg.imag();
@@ -300,6 +362,11 @@ int main(int argc, char **argv)
        printf(cformat_qlm_str.c_str(), ll, mm, xarg, yarg, xqlm, yqlm);
       }
 
+   //
+
+   }  
+
+   // End of  scoping for Q(l,m) tests
    //
    //---- End of main program 
    //

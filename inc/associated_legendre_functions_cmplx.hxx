@@ -706,11 +706,11 @@ template <typename T>
    std::complex<T> zcq0; 
 
    {
-    std::complex<T> z_plus_1  = z + ZONE; 
+    std::complex<T> one_plus_z  = ZONE + z; 
 
-    std::complex<T> z_minus_1 = z - ZONE;
+    std::complex<T> one_minus_z = ZONE - z;
 
-    std::complex<T> ztemp1 = z_plus_1 / z_minus_1;
+    std::complex<T> ztemp1 = one_plus_z / one_minus_z;
 
     std::complex<T> ztemp2 = zls_factor * ztemp1;
 
