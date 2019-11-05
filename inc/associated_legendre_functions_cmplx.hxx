@@ -605,20 +605,63 @@ template <typename T>
    //
    //--- Are we at the point +1 or -1 on the real axis.
    //
+   //    These are the poles of the function 
+   //
+   //    We stop the computation at this point.
+   //
+   //    The threshold is somewhat arbitary here.
+   //
 
-   T const drealabs = z.real();
-   T const dimagabs = z.imag();
+   T const MULTIPLIER = 20.0e+00;
 
-   bool const z_is_real_and_abs_is_1 = (drealabs == 1.0D+00) && 
-                                       (dimagabs == 0.0D+00);
+   T const EPSILON    = std::numeric_limits<T>::epsilon();
+
+   T const THRESHOLD  = MULTIPLIER * EPSILON;
+
+   T const drealz     = z.real();
+   T const dimagabs   = std::abs( z.imag() );
+
+   T const deltaabs = std::abs(1.0e+00 - drealz);
+   
+   bool const z_at_pole = (deltaabs < THRESHOLD) && 
+                          (dimagabs < THRESHOLD);
+
+   if( z_at_pole )
+     {
+      std::string cformat_str = " ";
+
+      if(  ( typeid(T) == typeid(double) ) ||
+           ( typeid(T) == typeid(float)  ) )
+        {
+         cformat_str = "    Argument  z = (%10.6f,%10.6f) \n";
+        }
+      else if( typeid(T) == typeid(long double) )
+        {
+         cformat_str = "    Argument  z = (%10.6Lf,%10.6Lf) \n";
+        }
+
+      printf(cformat_str.c_str(), z.real(), z.imag());
+
+      printf("\n\n");
+      printf("     is too close to one of the poles z=-1 or z=+1 on the \n");
+      printf("     real axis.  No computation will be performed.");
+      printf("\n\n");
+
+      exit(0);
+     }
+
+   //
+   //---- Ok, "z" is not at the poles so now decide if "z" lies
+   //     inside (even on), or outside the unit circle.
+   //
+
+   T radius_unit_circle = (1.0e+00 + EPSILON); 
 
    //
 
    T const zabs = std::abs(z);
 
-   bool const z_inside_unit_circle  = zabs < 1.0e+00;
-
-   bool const z_outside_unit_circle = zabs >= 1.0e+00;
+   bool const z_outside_unit_circle = zabs > radius_unit_circle;
 
    //
 
@@ -629,35 +672,26 @@ template <typename T>
       if(  ( typeid(T) == typeid(double) ) ||
            ( typeid(T) == typeid(float) ) )
         {
-         cformat_str = "      Absolute value of z = %13.6f ";
+         cformat_str = "      Absolute value of z = %13.6f - unit radius = %23.13e  ";
         }
       else if( typeid(T) == typeid(long double) )
         {
-         cformat_str = "      Absolute value of z = %13.6Lf ";
+         cformat_str = "      Absolute value of z = %13.6Lf - unit radius = %23.18Le ";
         }
 
-      printf(cformat_str.c_str(), zabs);
+      printf(cformat_str.c_str(), zabs, radius_unit_circle);
       printf("\n\n");
 
       //
 
-      if(z_is_real_and_abs_is_1)
-        {
-         printf("      Argument, z, is either +1 or -1");
-         printf("\n\n");
-
-         return;
-        }
-
       if(z_outside_unit_circle)
         {
-         printf("      Argument, z, lies on or outside the unit circle");
+         printf("      Argument, z, lies outside the unit circle");
          printf("\n\n");
         }
-
-      if(z_inside_unit_circle)
+      else
         {
-         printf("      Argument, z, lies inside the unit circle");
+         printf("      Argument, z, lies on or inside the unit circle");
          printf("\n\n");
         }
      }
@@ -672,14 +706,14 @@ template <typename T>
 
    std::complex<T> zls_factor; 
 
-   if(z_inside_unit_circle)
+   if(!z_outside_unit_circle)    // Inside the circle
      {
       zls_factor.real(1.0e+00);
       zls_factor.imag(0.0e+00);
      }
    else
      {
-      zls_factor.real(-1.0e+00);
+      zls_factor.real(-1.0e+00); // Outside the circle 
       zls_factor.imag(0.0e+00);
      }
 
@@ -703,22 +737,19 @@ template <typename T>
    //     The factor s represent zls_factor above.
    //
 
-   std::complex<T> zcq0; 
+   std::complex<T> const one_plus_z  = ZONE + z; 
 
-   {
-    std::complex<T> one_plus_z  = ZONE + z; 
+   std::complex<T> const one_minus_z = ZONE - z;
 
-    std::complex<T> one_minus_z = ZONE - z;
+   std::complex<T> const ztempor1 = one_plus_z / one_minus_z;
 
-    std::complex<T> ztemp1 = one_plus_z / one_minus_z;
+   std::complex<T> const ztempor2 = zls_factor * ztempor1;
 
-    std::complex<T> ztemp2 = zls_factor * ztemp1;
+   std::complex<T> const ztempor3 = std::log(ztempor2); 
 
-    std::complex<T> ztemp3 = std::log(ztemp2); 
-
-    zcq0 = ZHALF * ztemp3;
-   }
-    // End of scope for computation of zcq0
+   std::complex<T> const zcq0 = ZHALF * ztempor3;
+  
+   // 
 
    if(zdebug)
      {
@@ -740,25 +771,57 @@ template <typename T>
       printf("\n\n");
      }
 
+   //===============================================================
+   //
+   //   I N S I D E / O N  U N I T  C I R C L E  -  A B S ( Z ) <= 1 
+   //
+   //===============================================================
+
+   if(!z_outside_unit_circle)
+     {
+      //
+      //---- We can apply upwards recursion 
+      //
+      //     So we start by setting the 
+      //
+      //        l=0, m=0   
+      //        l=1, m=0
+      //        l=0, m=1
+      //        l=1, m=1
+      //
+      //     quadruplet to start the upwards recursion.
+      //
+      //     Remember that the index in the vector is [l][m]
+      //
+
+      zcqmvec[0][0] = zcq0;
+
+      //
+
+      std::complex<T> const ztemp10a = z * zcq0;
+
+      std::complex<T> const ztemp10b = ztemp10a - ZONE;
+
+      zcqmvec[1][0] = ztemp10b;
+
+      //
+
+      zcqmvec[0][1] =  ZMINUS1 / zq;
+ 
+      //
+
+      std::complex<T> const z_over_one_minus_zsqd = z / zone_minus_zsqd;
+
+      std::complex<T> const zbracket = zcq0 + z_over_one_minus_zsqd;
+
+      std::complex<T> const zproduct = zq * zbracket;
+ 
+      zcqmvec[1][1] = ZMINUS1 * zproduct;
+
+      //
+      //---- Ok, we apply recursion now to generate others.
+      //
 /**
-  if ( abs ( x ) == 1.0D+00 .and. y == 0.0D+00 ) then
-    do i = 0, m
-      do j = 0, n
-        cqm(i,j) = cmplx ( 1.0D+30, 0.0D+00, kind = 8 )
-        cqd(i,j) = cmplx ( 1.0D+30, 0.0D+00, kind = 8 )
-      end do
-    end do
-    return
-  end if
-
-  cq0 = 0.5D+00 * log ( ls * ( 1.0D+00 + z ) / ( 1.0D+00 - z ) )
-
-  if ( xc < 1.0001D+00 ) then
-
-    cqm(0,0) = cq0
-    cqm(0,1) = z * cq0 - 1.0D+00
-    cqm(1,0) = -1.0D+00 / zq
-    cqm(1,1) = - zq * ( cq0 + z / ( 1.0D+00 - z * z ) )
     do i = 0, 1
       do j = 2, n
         cqm(i,j) = ( ( 2.0D+00 * j - 1.0D+00 ) * z * cqm(i,j-1) &
@@ -772,15 +835,15 @@ template <typename T>
           - ls * ( j + i - 1.0D+00 ) * ( j - i + 2.0D+00 ) * cqm(i-2,j)
       end do
     end do
-
-  else
 */
-   
+     }
+   //===============================================================
    //
-   //---- 
+   //   O U T S I D E   U N I T  C I R C L E  -  A B S ( Z ) > 1 
    //
+   //===============================================================
 
-   if(z_outside_unit_circle)
+   else // z_outside_unit_circle)
      {
       unsigned int km;
 

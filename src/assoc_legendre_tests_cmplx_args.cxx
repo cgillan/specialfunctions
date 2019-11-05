@@ -71,10 +71,10 @@ int main(int argc, char **argv)
    printf("         epsilon       : %13.7Le \n", std::numeric_limits<long double>::epsilon());
    printf("\n");
 
-   std::complex<long double> zarg;
- 
-   zarg.real(2.00e+00); zarg.imag(0.0e+00);
+   std::complex<long double>   zarg;
 
+   //
+   //---- Determine, at runtime, the data type for which we were compiled
    //
 
    std::string cformat_type_str = " ";
@@ -102,6 +102,34 @@ int main(int argc, char **argv)
 
    printf(cformat_type_str.c_str(), __FILE__);
    printf("\n\n");
+
+   //
+   //---- Prepare vector of arguments 
+   //
+
+   std::vector<std::complex<long double> > zarg_vec;
+
+   {
+    std::complex<long double> zarg;
+ 
+    zarg.real(0.5e+00); zarg.imag(0.0e+00);
+
+    zarg_vec.push_back(zarg);
+
+    zarg.real(2.0e+00); zarg.imag(0.0e+00);
+
+    zarg_vec.push_back(zarg);
+   }
+
+   //================================================================
+   //
+   //    L O O P  O V E R   A R G U M E N T S
+   //
+   //================================================================
+
+   for(int indx=0; indx<zarg_vec.size(); ++indx)
+   {
+   std::complex<long double> const zarg = zarg_vec[indx];
 
    //======================================================================
    //
@@ -134,6 +162,7 @@ int main(int argc, char **argv)
    int const Ltemp = *iter_max_l;
    int const Mtemp = *iter_max_m;
 
+   printf("\n\n");
    printf("     List of P(l,m) values to be tested at each argument");
    printf("\n\n");
    printf("     Index    l      m   \n");
@@ -230,6 +259,8 @@ int main(int argc, char **argv)
 
        printf(cformat_plm_str.c_str(), l, m, xarg, yarg, xplm, yplm);
       }
+
+   printf("\n\n");
 
    //
 
@@ -367,6 +398,15 @@ int main(int argc, char **argv)
    }  
 
    // End of  scoping for Q(l,m) tests
+
+   } // End loop over arguments 
+
+   //================================================================
+   //
+   //    E N D   L O O P  O V E R   A R G U M E N T S
+   //
+   //================================================================
+
    //
    //---- End of main program 
    //
