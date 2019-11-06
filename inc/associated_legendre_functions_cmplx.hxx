@@ -565,17 +565,17 @@ template <typename T>
      }
 
    //
-   //---- Let's establish the constants 0.0, 1.0, 2.0 
+   //---- Let's establish the constants -2.0, -1.0, 0.0, 0.5, 1.0, 2.0 
    //     as complex variables
    //
-   //     Following initialisation works over different versions
+   //     Following style of initialisation works over different versions
    //     of the compiler 
    //
   
-   std::complex<T> ZMINUS1;
+   std::complex<T> ZMINUS2;     std::complex<T> ZMINUS1;
 
-   ZMINUS1.real(-1.0e+00);
-   ZMINUS1.imag(0.0e+00);
+   ZMINUS2.real(-2.0e+00);      ZMINUS1.real(-1.0e+00);
+   ZMINUS2.imag(0.0e+00);       ZMINUS1.imag(0.0e+00);
 
    std::complex<T> ZERO;  std::complex<T> ZONE;  std::complex<T> ZTWO;
 
@@ -821,22 +821,131 @@ template <typename T>
       //
       //---- Ok, we apply recursion now to generate others.
       //
-/**
-    do i = 0, 1
-      do j = 2, n
-        cqm(i,j) = ( ( 2.0D+00 * j - 1.0D+00 ) * z * cqm(i,j-1) &
-          - ( j + i - 1.0D+00 ) * cqm(i,j-2) ) / ( j - i )
-      end do
-    end do
+      //     We set m=0 and m=1 and work from l=2,..., lmax
+      //
 
-    do j = 0, n
-      do i = 2, m
-        cqm(i,j) = -2.0D+00 * ( i - 1.0D+00 ) * z / zq * cqm(i-1,j) &
-          - ls * ( j + i - 1.0D+00 ) * ( j - i + 2.0D+00 ) * cqm(i-2,j)
-      end do
-    end do
-*/
+      for(int mval=0; mval<=1; ++mval)
+         {
+          for(int lval=2; lval<=lmax; ++lval)
+             {
+              //
+              //.... Build up the nominator as a complex number
+              //
+              //     Start with the factors depending on l,m in brackets
+              //
+
+              int const ibracketa = 2*lval - 1;
+
+              int const ibracketb = lval + mval - 1;
+
+              T const dbracketa   = static_cast<T>(ibracketa);
+
+              T const dbracketb   = static_cast<T>(ibracketb);
+
+              std::complex<T> zbracketa, zbracketb;
+
+              zbracketa.real(dbracketa); zbracketa.imag(0.0e+00);
+
+              zbracketb.real(dbracketb); zbracketb.imag(0.0e+00);
+
+              //
+
+              std::complex<T> const zfirst_temp  = z * zcqmvec[lval-1][mval];
+
+              std::complex<T> const zfirst_term  = zbracketa * zfirst_temp;
+
+              std::complex<T> const zsecond_term = zbracketb * zcqmvec[lval-2][mval]; 
+
+              std::complex<T> const znumerator   = zfirst_term - zsecond_term;
+
+              //
+              //.... Build up the denominator as a complex number
+              //
+
+              int const itemp = lval - mval;
+
+              T   const dtemp = static_cast<T>(itemp);
+
+              std::complex<T> ztemp;
+
+              ztemp.real(dtemp); ztemp.imag(dtemp);
+
+              std::complex<T> const zdenominator = ZONE / ztemp;
+
+              //
+
+              zcqmvec[lval][mval] = znumerator / zdenominator;
+             }
+              // End loop over lval 
+         }
+          // End loop over mval 
+
+      //
+      //---- Complete the recursion by working on .
+      //
+      //     l = 0 ,..., lmax and m = 2, ..., mmax
+      //
+
+      for(int lval=0; lval<=lmax; ++lval)
+         {
+          for(int mval=2; mval<=mmax; ++mval)
+             {
+              //
+              //.... Build up the brackets complex numbers
+              //
+
+              int const ibracketa = mval - 1;
+
+              int const ibracketb = lval + mval - 1;
+
+              int const ibracketc = lval - mval + 2;
+
+              T const dbracketa   = static_cast<T>(ibracketa);
+
+              T const dbracketb   = static_cast<T>(ibracketb);
+
+              T const dbracketc   = static_cast<T>(ibracketc);
+
+              std::complex<T> zbracketa, zbracketb, zbracketc;
+
+              zbracketa.real(dbracketa); zbracketa.imag(0.0e+00);
+
+              zbracketb.real(dbracketb); zbracketb.imag(0.0e+00);
+
+              zbracketc.real(dbracketc); zbracketc.imag(0.0e+00);
+
+              //
+              //.... First term 
+              //
+
+              std::complex<T> const zfirst_tempa = ZMINUS2 * zbracketa;
+
+              std::complex<T> const zfirst_tempb = zfirst_tempa * z;
+
+              std::complex<T> const zfirst_tempc = zfirst_tempb * zcqmvec[lval][mval-1]; 
+
+              std::complex<T> const zfirst_term  = zfirst_tempc / zq;
+
+              //
+              //.... Second term
+              //
+
+              std::complex<T> const zsecond_tempa = zbracketb * zbracketc;
+
+              std::complex<T> const zsecond_tempb = zsecond_tempa * zcqmvec[lval][mval-2];
+
+              std::complex<T> const zsecond_term  = zsecond_tempb * zls_factor;
+
+              //
+
+              zcqmvec[lval][mval] = zfirst_term - zsecond_term;
+             }
+              // End loop over lval 
+         }
+          // End loop over mval
      }
+      // End of if block for z inside unit circle
+
    //===============================================================
    //
    //   O U T S I D E   U N I T  C I R C L E  -  A B S ( Z ) > 1 
