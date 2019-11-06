@@ -149,8 +149,8 @@ int main(int argc, char **argv)
    //     See pages 118 and following of their book.
    //
 
-   std::vector<int> l_vec_test_p { 1, 2, 3, 10, 2, 3, 4, 10, 3, 4, 5, 10, 4, 5, 6 };
-   std::vector<int> m_vec_test_p { 1, 1, 1,  1, 2, 3, 2,  2, 3, 3, 3,  3, 4, 4, 4 };
+   std::vector<int> l_vec_test_p { 1, 2, 3, 10, 2, 3, 4, 10, 3, 4, 5, 10, 4, 5, 6, 10 };
+   std::vector<int> m_vec_test_p { 1, 1, 1,  1, 2, 3, 2,  2, 3, 3, 3,  3, 4, 4, 4,  4 };
 
    //
    //---- Set the maximum L and M and argument "z"  

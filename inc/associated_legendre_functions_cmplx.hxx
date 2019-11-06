@@ -706,14 +706,14 @@ template <typename T>
 
    std::complex<T> zls_factor; 
 
-   if(!z_outside_unit_circle)    // Inside the circle
+   if(z_outside_unit_circle)    
      {
-      zls_factor.real(1.0e+00);
+      zls_factor.real(-1.0e+00);  
       zls_factor.imag(0.0e+00);
      }
    else
      {
-      zls_factor.real(-1.0e+00); // Outside the circle 
+      zls_factor.real(1.0e+00);
       zls_factor.imag(0.0e+00);
      }
 
@@ -796,6 +796,8 @@ template <typename T>
 
       zcqmvec[0][0] = zcq0;
 
+      //printf("   zcqmvec[l=%d][m=%d] = (%13.6Le,%13.6Le) ",0,0,zcqmvec[0][0].real(), zcqmvec[0][0].imag());
+
       //
 
       std::complex<T> const ztemp10a = z * zcq0;
@@ -804,10 +806,14 @@ template <typename T>
 
       zcqmvec[1][0] = ztemp10b;
 
+      //printf("   zcqmvec[l=%d][m=%d] = (%13.6Le,%13.6Le) ",1,0,zcqmvec[1][0].real(), zcqmvec[1][0].imag());
+
       //
 
       zcqmvec[0][1] =  ZMINUS1 / zq;
  
+      //printf("   zcqmvec[l=%d][m=%d] = (%13.6Le,%13.6Le) ",0,1,zcqmvec[0][1].real(), zcqmvec[0][1].imag());
+
       //
 
       std::complex<T> const z_over_one_minus_zsqd = z / zone_minus_zsqd;
@@ -817,6 +823,8 @@ template <typename T>
       std::complex<T> const zproduct = zq * zbracket;
  
       zcqmvec[1][1] = ZMINUS1 * zproduct;
+
+      //printf("   zcqmvec[l=%d][m=%d] = (%13.6Le,%13.6Le) ",1,1,zcqmvec[1][1].real(), zcqmvec[1][1].imag());
 
       //
       //---- Ok, we apply recursion now to generate others.
@@ -854,6 +862,8 @@ template <typename T>
 
               std::complex<T> const zfirst_term  = zbracketa * zfirst_temp;
 
+              //
+
               std::complex<T> const zsecond_term = zbracketb * zcqmvec[lval-2][mval]; 
 
               std::complex<T> const znumerator   = zfirst_term - zsecond_term;
@@ -866,11 +876,9 @@ template <typename T>
 
               T   const dtemp = static_cast<T>(itemp);
 
-              std::complex<T> ztemp;
+              std::complex<T> zdenominator;
 
-              ztemp.real(dtemp); ztemp.imag(dtemp);
-
-              std::complex<T> const zdenominator = ZONE / ztemp;
+              zdenominator.real(dtemp); zdenominator.imag(0.0e+00);
 
               //
 
@@ -1335,7 +1343,7 @@ template <typename T>
 
    return;
   }
-   // End of ...()
+   // End of generation of the Q(l,m) values()
 
 /**
  *  Method: power_complx_to_unsigned_int()
