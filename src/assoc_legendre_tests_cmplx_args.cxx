@@ -112,13 +112,11 @@ int main(int argc, char **argv)
    {
     std::complex<long double> zarg;
  
-    zarg.real(0.5e+00); zarg.imag(0.0e+00);
+    zarg.real(0.5e+00); zarg.imag(0.0e+00);   zarg_vec.push_back(zarg);
 
-    zarg_vec.push_back(zarg);
+    zarg.real(1.5e+00); zarg.imag(0.0e+00);   zarg_vec.push_back(zarg);
 
-    zarg.real(2.0e+00); zarg.imag(0.0e+00);
-
-    zarg_vec.push_back(zarg);
+    zarg.real(2.0e+00); zarg.imag(0.0e+00);   zarg_vec.push_back(zarg);
    }
 
    //================================================================
@@ -130,6 +128,9 @@ int main(int argc, char **argv)
    for(int indx=0; indx<zarg_vec.size(); ++indx)
    {
    std::complex<long double> const zarg = zarg_vec[indx];
+
+   printf("\n\n "); 
+     for(int icol=2; icol<72;++icol) printf("-"); 
 
    //======================================================================
    //
@@ -162,21 +163,21 @@ int main(int argc, char **argv)
    int const Ltemp = *iter_max_l;
    int const Mtemp = *iter_max_m;
 
-   printf("\n\n");
-   printf("     List of P(l,m) values to be tested at each argument");
-   printf("\n\n");
-   printf("     Index    l      m   \n");
-   printf("     -----  -----  ----- \n");
+   //printf("\n\n");
+   //printf("     List of P(l,m) values to be tested at each argument");
+   //printf("\n\n");
+   //printf("     Index    l      m   \n");
+   //printf("     -----  -----  ----- \n");
 
-   for(int i=0; i<l_vec_test_p.size(); ++i)
-      {
-       printf("     %5d  %5d  %5d  \n", i+1, l_vec_test_p[i], m_vec_test_p[i]);
-      }
+   //for(int i=0; i<l_vec_test_p.size(); ++i)
+   //   {
+   //    printf("     %5d  %5d  %5d  \n", i+1, l_vec_test_p[i], m_vec_test_p[i]);
+   //   }
    
-   printf("\n\n");
-   printf("      Maximum L value in test list = %4d \n", Ltemp);
-   printf("      Maximum M value              = %4d \n", Mtemp);
-   printf("\n\n");
+   //printf("\n\n");
+   //printf("      Maximum L value in test list = %4d \n", Ltemp);
+   //printf("      Maximum M value              = %4d \n", Mtemp);
+   //printf("\n\n");
 
    //
    //---- Given the way that the routines work with triangles and 
@@ -297,6 +298,7 @@ int main(int argc, char **argv)
    int const Ltemp = *iter_max_l;
    int const Mtemp = *iter_max_m;
 
+   /**
    printf("     List of Q(l,m) values to be tested at each argument");
    printf("\n\n");
    printf("     Index    l      m   \n");
@@ -311,6 +313,7 @@ int main(int argc, char **argv)
    printf("      Maximum L value in test list = %4d \n", Ltemp);
    printf("      Maximum M value              = %4d \n", Mtemp);
    printf("\n\n");
+   */
 
    //
    //---- Given the way that the routines work with triangles and 

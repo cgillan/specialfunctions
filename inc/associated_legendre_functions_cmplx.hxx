@@ -167,7 +167,7 @@ template <typename T>
            std::complex<T> z,
            std::vector<std::vector<std::complex<T> > > &cpmvec)
   {
-   bool const zdebug = true;
+   bool const zdebug = false;
 
    std::string const method_name_str = "complex_unnormalized_assoc_regular_legendre()";
 
@@ -527,7 +527,7 @@ template <typename T>
            std::complex<T> z,
            std::vector<std::vector<std::complex<T> > > &zcqmvec)
   {
-   bool const zdebug = true;
+   bool const zdebug = false;
 
    std::string const method_name_str = "complex_unnormalized_assoc_irregular_legendre()";
 
@@ -1258,7 +1258,7 @@ template <typename T>
           std::complex<T> zcq0 = zcqmvec[lval][0];
           std::complex<T> zcq1 = zcqmvec[lval][1];
 
-          for(int mval=2; mval<=mmax; ++mval)
+          for(int mval=0; mval<=mmax-2; ++mval)
              {
               //
               //.... First term in the recursion of (4.4.10)
@@ -1267,7 +1267,7 @@ template <typename T>
               std::complex<T> zterm_first = ZERO;
 
               {
-               T const dmval_plus_1 = static_cast<T>(mval - 1);
+               T const dmval_plus_1 = static_cast<T>(mval + 1);
 
                T const dtemp11      = -2.0e+00 * dmval_plus_1;  
 
@@ -1290,14 +1290,14 @@ template <typename T>
               std::complex<T> zterm_second = ZERO;
 
               {
-               T const dlval_plus_mval_minus_1 
+               T const dlval_minus_mval 
+                              = static_cast<T>(lval - mval);
+
+               T const dlval_plus_mval_plus_1
                               = static_cast<T>(lval + mval + 1);
 
-               T const dlval_minus_mval_plus_2
-                              = static_cast<T>(lval - mval + 2);
-
-               T const dtemp21 = dlval_plus_mval_minus_1 * 
-                                        dlval_minus_mval_plus_2;
+               T const dtemp21 = dlval_minus_mval * 
+                                        dlval_plus_mval_plus_1;
 
                std::complex<T> ztemp21;
 
@@ -1310,12 +1310,10 @@ template <typename T>
               //
               //.... Compute the recursion and store 
               //
-              //     Note that its a subtraction
-              //
 
-              std::complex<T> zcqf = zterm_first - zterm_second;
+              std::complex<T> zcqf = zterm_first + zterm_second;
 
-              zcqmvec[lval][mval] = zcqf;
+              zcqmvec[lval][mval+2] = zcqf;
 
               //
               //.... Push down the values for the next term
