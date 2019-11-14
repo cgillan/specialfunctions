@@ -27,7 +27,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "associated_legendre_functions_real.hxx"
+#include "associated_legendre_functions.hxx"
   
 #include "monitor_fl_pt_exceptions.hxx"
 

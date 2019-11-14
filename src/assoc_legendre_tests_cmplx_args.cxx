@@ -28,7 +28,7 @@
 #include <vector>
 #include <algorithm>
 
-#include <associated_legendre_functions_cmplx.hxx>  
+#include <associated_legendre_functions.hxx>  
 
 #include <monitor_fl_pt_exceptions.hxx>
 
