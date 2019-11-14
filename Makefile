@@ -54,7 +54,7 @@ LIBS= -lmonitor -lm -lrt
 #     Separate rule for each teet harness
 #
 
-all: clean monitorlib testzhangjin testreal testcmplx 
+all: clean monitorlib cplm testreal testcmplx 
 
 monitorlib:
 	$(CXX) $(INCS) $(CXXOPTS) -c   \
@@ -63,10 +63,10 @@ monitorlib:
 	$(AR)  $(AROPTS) $(PROJ_LIB)/libmonitor.a \
                $(PROJ_SRC)/monitor_fl_pt_exceptions.o    
 
-testzhangjin:
+cplm:
 	$(CXX) $(INCS) $(CXXOPTS) $(LIBDIRS)  \
-               -o $(PROJ_BIN)/zhang_jin_plm.x \
-               $(PROJ_SRC)/zhang_jin_plm.cxx $(LIBS) 
+               -o $(PROJ_BIN)/cplm.x \
+               $(PROJ_SRC)/cplm.cxx $(LIBS) 
 
 testreal:
 	$(CXX) $(INCS) $(CXXOPTS) $(LIBDIRS) \
