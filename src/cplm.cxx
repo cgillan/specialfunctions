@@ -502,6 +502,22 @@ int main(int argc, char **argv)
     zarg.real(2.5e+00); zarg.imag(0.0e+00);   zarg_vec.push_back(zarg);
 
     zarg.real(3.0e+00); zarg.imag(0.0e+00);   zarg_vec.push_back(zarg);
+
+    zarg.real(3.5e+00); zarg.imag(0.0e+00);   zarg_vec.push_back(zarg);
+
+    zarg.real(4.0e+00); zarg.imag(0.0e+00);   zarg_vec.push_back(zarg);
+
+    zarg.real(4.5e+00); zarg.imag(0.0e+00);   zarg_vec.push_back(zarg);
+
+    zarg.real(5.0e+00); zarg.imag(0.0e+00);   zarg_vec.push_back(zarg);
+
+    zarg.real(5.5e+00); zarg.imag(0.0e+00);   zarg_vec.push_back(zarg);
+
+    zarg.real(6.0e+00); zarg.imag(0.0e+00);   zarg_vec.push_back(zarg);
+
+    zarg.real(6.5e+00); zarg.imag(0.0e+00);   zarg_vec.push_back(zarg);
+
+    zarg.real(7.0e+00); zarg.imag(0.0e+00);   zarg_vec.push_back(zarg);
    }
 
    //
@@ -511,8 +527,8 @@ int main(int argc, char **argv)
    //     See pages 118 and following of their book.
    //
 
-   std::vector<int> l_vec_test_p { 1, 2, 3, 10, 2, 3, 4, 10, 3, 4, 5, 10, 4, 5, 6, 10 };
-   std::vector<int> m_vec_test_p { 1, 1, 1,  1, 2, 3, 2,  2, 3, 3, 3,  3, 4, 4, 4,  4 };
+   std::vector<int> l_vec_test_p { 1, 2, 3, 10, 2, 3, 4, 10,  3, 4, 5, 10,  4, 5, 6, 10 };
+   std::vector<int> m_vec_test_p { 1, 1, 1,  1, 2, 2, 2,  2,  3, 3, 3,  3,  4, 4, 4,  4 };
 
    //================================================================
    //

@@ -1,7 +1,7 @@
 //************************************************************************
 //************************************************************************
 //
-//   assoc_legendre_tests.cxx  
+//   assoc_legendre_tests_real_args.cxx  
 //
 //   NB: Need --std=c++11 (or similar) on 
 //       g++ otherwise this fails 
@@ -28,7 +28,7 @@
 #include <algorithm>
 
 #include "associated_legendre_functions.hxx"
-  
+
 #include "monitor_fl_pt_exceptions.hxx"
 
 /**
@@ -71,39 +71,143 @@ int main(int argc, char **argv)
    printf("\n");
 
    //
-   //---- Set the maximum L and M and argument "x"  
+   //---- Determine, at runtime, the data type for which we were compiled
    //
 
-   int const Lmax =  200;
-   int const Mmax =  200;
+   long double xarg;
 
-   long double const x = 1.10e+00;
+   std::string cformat_type_str = " ";
 
-   //======================================================================
+   if(typeid(xarg) == typeid( float ))
+     {
+      cformat_type_str = "     Data type for argument is: float. \n\n     File name = %s";
+     }
+   else if(typeid(xarg) == typeid( double ))
+     {
+      cformat_type_str = "     Data type for argument is: double. \n\n     File name = %s";
+     }
+   else if(typeid(xarg) == typeid( long double ))
+     {
+      cformat_type_str = "     Data type for argument is: long double. \n\n     File name = %s";
+     }
+   else
+     {
+      printf("\n\n");
+      printf("     **** Error: Type for the complex argument is unknown");
+      printf("\n\n");
+
+      exit(0);
+     }
+
+   printf(cformat_type_str.c_str(), __FILE__);
+   printf("\n\n");
+
    //
-   //     R E G U L A R   L E G E N D R E   F U N C T I O N S
+   //---- Prepare vector of arguments 
    //
-   //======================================================================
 
-   for(int m=0; m<=Mmax; ++m)
+   std::vector<long double> xarg_vec;
+
+   {
+    xarg = 0.5e+00; xarg_vec.push_back(xarg);
+
+    xarg = 1.5e+00; xarg_vec.push_back(xarg);
+
+    xarg = 2.0e+00; xarg_vec.push_back(xarg);
+   }
+
+   //
+   //---- Set the maximum L and M   
+   //
+
+   int const Lmax = 20;
+   int const Mmax = 20;
+
+   printf("\n\n");
+   printf("      Maximum L value = %4d \n", Lmax);
+   printf("      Maximum M value = %4d \n", Mmax);
+
+   //================================================================
+   //
+   //    L O O P  O V E R   A R G U M E N T S
+   //
+   //================================================================
+
+   for(int indx=0; indx<xarg_vec.size(); ++indx)
       {
+       auto const x = xarg_vec[indx];
+
+       printf("\n\n "); 
+          for(int icol=2; icol<72;++icol) printf("-"); 
+
        printf("\n\n");
-       printf("     Computing regular associated Legendre functions \n");
-       printf("     for m = %d and l in the range [%d,%d] ", m,m,Lmax);
 
        //
+       //---- Regular functions 
+       //
 
-       std::vector<long double> plm_vec;
+       for(int m=0; m<=Mmax; ++m)
+          {
+           printf("     Computing regular Legendre functions P_lm(x) for m value = %d", m);
+           printf("\n\n");
+           printf("     Argument (x) = %15.6Lf", x);
+           printf("\n\n");
 
-       plm_vec.resize(Lmax+1);
+           //
+
+           std::vector<long double> plm_vec;
+
+           plm_vec.resize(Lmax+1);
+
+           //
+           //..... Compute for l=m, ...., Lmax
+           //
+
+           std::feclearexcept(FE_ALL_EXCEPT);
+
+           unnormalised_associated_regular_Legendre(Lmax,m,x,plm_vec);
+
+           monitor_fl_pt_exceptions();
+
+           //
+
+           printf("\n\n");
+           printf("     Real argument (x) = %15.6Lf ", x);
+           printf("\n\n");
+           printf("     Computed associated Legendre functions of the first kind (regular)");
+           printf("\n\n");
+           printf("      l    m        x         Associated Legendre function \n");
+           printf("     ---  ---  -------------  ---------------------------- \n");
+
+           for(int l=m; l<=Lmax; ++l)
+              {
+               printf("     %3d  %3d  %13.7Lf  %28.14Le \n", l, m, x, plm_vec[l]);
+              }
+
+           printf("\n\n");
+          }
+           // End loop over m values 
 
        //
-       //..... Compute for l=m, ...., Lmax
+       //---- Irregular functions 
+       //
+
+       std::vector<std::vector<long double> > qlm_mat;
+
+       qlm_mat.resize(Lmax+1);
+
+       for(int ll=0; ll<=Lmax; ++ll)
+          {
+           qlm_mat[ll].resize(Mmax+1);
+          }
+ 
        //
 
        std::feclearexcept(FE_ALL_EXCEPT);
 
-       unnormalised_associated_regular_Legendre(Lmax,m,x,plm_vec);
+       //unnormalised_associated_irregular_Legendre_big_arg(Mmax,Lmax,x,qlm_mat);
+
+       real_unnormalized_assoc_irregular_legendre(Mmax,Lmax,x,qlm_mat);
 
        monitor_fl_pt_exceptions();
 
@@ -112,67 +216,20 @@ int main(int argc, char **argv)
        printf("\n\n");
        printf("     Real argument (x) = %15.6Lf ", x);
        printf("\n\n");
-       printf("     Computed associated Legendre functions of the first kind (regular)");
+       printf("     Computed associated Legendre functions of the second kind (irregular)");
        printf("\n\n");
        printf("      l    m        x        Associated Legendre function \n");
        printf("     ---  ---  ------------- ---------------------------- \n");
 
-       for(int l=m; l<=Lmax; ++l)
+       for(int ll=0; ll<=Lmax; ++ll)
           {
-           printf("     %3d  %3d  %15.6Le       %15.6Le \n", l, m, x, plm_vec[l]);
+           for(int mm=0; mm<=Mmax; ++mm)
+              {
+               printf("     %3d  %3d  %15.6Le       %15.6Le \n", ll, mm, x, qlm_mat[ll][mm]);
+              }
           }
       }
-       // End loop over m values 
-
-   //======================================================================
-   //
-   //     I R R E G U L A R   L E G E N D R E   F U N C T I O N S
-   //
-   //======================================================================
-
-   printf("\n\n");
-   printf("     Computing regular associated Legendre functions \n");
-   printf("     for m in range [%d,%d] and l in the range [%d,%d] ", 
-           0,Mmax, 0,Lmax);
-
-   //
-   //---- Create rectangular storage
-   //
-
-   std::vector<std::vector<long double> > qlm_mat;
-
-   qlm_mat.resize(Lmax+1);
-
-   for(int ll=0; ll<=Lmax; ++ll)
-      {
-       qlm_mat[ll].resize(Mmax+1);
-      }
- 
-   //
-
-   std::feclearexcept(FE_ALL_EXCEPT);
-
-   unnormalised_associated_irregular_Legendre_big_arg(Lmax,Mmax,x,qlm_mat);
-
-   monitor_fl_pt_exceptions();
-
-   //
-
-   printf("\n\n");
-   printf("     Real argument (x) = %15.6Lf ", x);
-   printf("\n\n");
-   printf("     Computed associated Legendre functions of the second kind (irregular)");
-   printf("\n\n");
-   printf("      l    m        x        Associated Legendre function \n");
-   printf("     ---  ---  ------------- ---------------------------- \n");
-
-   for(int ll=0; ll<=Lmax; ++ll)
-      {
-       for(int mm=0; mm<=Mmax; ++mm)
-          {
-           printf("     %3d  %3d  %15.6Le       %15.6Le \n", ll, mm, x, qlm_mat[ll][mm]);
-          }
-      }
+       // End of loop over arguments "x"
 
    //
    //---- End of main program 

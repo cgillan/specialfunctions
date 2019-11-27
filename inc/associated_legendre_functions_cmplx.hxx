@@ -47,6 +47,92 @@
 #include <typeinfo>
 
 /**
+ *  Procedure: real_factorial()
+ *
+ *  Compute factorial of integer "n"
+ *
+ *  Return floating point type only.
+ *
+ */
+template <typename T>
+    typename std::enable_if<std::is_floating_point<T>::value,void>::type
+       real_factorial(unsigned int const n, T &xfact)
+  {
+   bool zdebug = false;
+
+   std::ostringstream os;
+
+   //
+
+   if(zdebug)
+     {
+      os.str(""); os.clear();
+
+      os << "\n\n"
+         << "          >>>>> factorial(unsigned int)"
+         << "\n\n"
+         << "          n = " << n
+         << "\n\n";
+
+      std::cout << os.str() << "\n";
+     }
+
+   //
+
+   if(0 == n)
+     {
+      xfact = 1.0e+00;
+     }
+   else if(n == 1)
+     {
+      xfact = 1.0e+00;
+     }
+   else if(n > 1)
+     {
+      unsigned int const n1 = n - 1;
+
+      T xfact_1;
+
+      real_factorial(n1,xfact_1);
+
+      T const xtemp = static_cast<T>(n);
+
+      xfact =  xtemp * xfact_1;
+     }
+   else
+     {
+      os.str(""); os.clear();
+
+      os << "\n\n"
+         << "          **** Error: factorial(unsigned int)"
+         << "\n\n"
+         << "          n is negative;  value = " << n
+         << "\n\n";
+
+      std::cout << os.str() << "\n";
+
+      exit(0);
+     }
+
+   //
+
+   if(zdebug)
+     {
+      os.str(""); os.clear();
+
+      os << "          Result: " << xfact
+         << "\n\n"
+         << "          <<<<< Completed: factorial(unsigned int)"
+         << "\n\n";
+
+      std::cout << os.str() << "\n";
+     }
+
+   return;
+  }
+   // End functon real_factorial()
+
+/**
  *  Function: complex_unnormalized_assoc_regular_legendre()
  *
  *  This is the pictorial view of cpmvec[][]. It is a lower 
