@@ -47,45 +47,43 @@
 void monitor_fl_pt_exceptions()
   {
    printf("\n\n");
-   printf("     Reporting status of floating point exception flags.");
-   printf("\n\n");
 
    if(std::fetestexcept(FE_ALL_EXCEPT))
      {
       if(std::fetestexcept(FE_DIVBYZERO)) 
         {
-         printf("     **** Division by zero reported");
-         printf("\n");
+         printf("     **** Floating point division by zero reported");
+         printf("\n\n");
         }
 
       if(std::fetestexcept(FE_INEXACT)) 
         {
-         printf("     **** Inexact computation ");
-         printf("\n");
+         printf("     **** Floating point inexact computation reported");
+         printf("\n\n");
         }
 
       if(std::fetestexcept(FE_INVALID)) 
         {
-         printf("     **** Invalid computation ");
-         printf("\n");
+         printf("     **** Floating point invalid computation reported");
+         printf("\n\n");
         }
 
       if(std::fetestexcept(FE_OVERFLOW)) 
         {
-         printf("     **** Overflow reported ");
-         printf("\n");
+         printf("     **** Floating point overflow reported ");
+         printf("\n\n");
         }
 
       if(std::fetestexcept(FE_UNDERFLOW)) 
         {
-         printf("     **** Underflow reported ");
-         printf("\n");
+         printf("     **** Floating point underflow reported ");
+         printf("\n\n");
         }
      }
    else
      {
-      printf("     No floating point exception flags are set.");
-      printf("\n");
+      printf("     **** NO floating point exception flags were reported.");
+      printf("\n\n");
      }
       // End of test on floating point exceptions being raised
 

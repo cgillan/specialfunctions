@@ -114,6 +114,18 @@ int main(int argc, char **argv)
     xarg = 1.5e+00; xarg_vec.push_back(xarg);
 
     xarg = 2.0e+00; xarg_vec.push_back(xarg);
+
+    xarg = 2.5e+00; xarg_vec.push_back(xarg);
+
+    xarg = 3.0e+00; xarg_vec.push_back(xarg);
+
+    xarg = 3.5e+00; xarg_vec.push_back(xarg);
+
+    xarg = 4.0e+00; xarg_vec.push_back(xarg);
+
+    xarg = 4.5e+00; xarg_vec.push_back(xarg);
+
+    xarg = 5.0e+00; xarg_vec.push_back(xarg);
    }
 
    //
@@ -124,8 +136,8 @@ int main(int argc, char **argv)
    int const Mmax = 20;
 
    printf("\n\n");
-   printf("      Maximum L value = %4d \n", Lmax);
-   printf("      Maximum M value = %4d \n", Mmax);
+   printf("     Maximum L value = %4d \n", Lmax);
+   printf("     Maximum M value = %4d \n", Mmax);
 
    //================================================================
    //
@@ -149,8 +161,6 @@ int main(int argc, char **argv)
        for(int m=0; m<=Mmax; ++m)
           {
            printf("     Computing regular Legendre functions P_lm(x) for m value = %d", m);
-           printf("\n\n");
-           printf("     Argument (x) = %15.6Lf", x);
            printf("\n\n");
 
            //
@@ -205,9 +215,7 @@ int main(int argc, char **argv)
 
        std::feclearexcept(FE_ALL_EXCEPT);
 
-       //unnormalised_associated_irregular_Legendre_big_arg(Mmax,Lmax,x,qlm_mat);
-
-       real_unnormalized_assoc_irregular_legendre(Mmax,Lmax,x,qlm_mat);
+       unnormalised_associated_irregular_Legendre(Mmax,Lmax,x,qlm_mat);
 
        monitor_fl_pt_exceptions();
 

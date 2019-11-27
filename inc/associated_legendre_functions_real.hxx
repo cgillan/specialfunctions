@@ -1,7 +1,7 @@
 //************************************************************************
 //************************************************************************
 //
-//   associated_legendre_functions_real.hxx  
+//   associated_Legendre_functions_real.hxx  
 //
 //   This file implesments templates to compute regular and irregular
 //   associated Legendre functions for values on the REAL axis
@@ -894,15 +894,16 @@ template <typename T>
   }
    // End of unnormalised_associated_irregular_Legendre_big_arg() 
 
+
 /**
- *  Function: real_unnormalized_assoc_irregular_legendre_small_arg()
+ *  Function: unnormalized_assoc_irregular_Legendre_small_arg()
  *
  *  Computes the function for |x| < 1
  *
  */
 template <typename T> 
    typename std::enable_if<std::is_floating_point<T>::value,void>::type  
-     real_unnormalized_assoc_irregular_legendre(
+     unnormalized_assoc_irregular_Legendre_small_arg(
            unsigned int const mmax, 
            unsigned int const lmax,
            T xarg,
@@ -910,7 +911,7 @@ template <typename T>
   {
    bool const zdebug = true;
 
-   std::string const method_name_str = "real_unnormalized_assoc_irregular_legendre_small_arg()";
+   std::string const method_name_str = "unnormalized_assoc_irregular_Legendre_small_arg()";
 
    //
    //---- Debug banner header 
@@ -1304,6 +1305,101 @@ template <typename T>
    return;
   }
    // End of generation of the Q(l,m) values() |x| < 1
+
+/**
+ *  Function: unnormalized_assoc_irregular_Legendre()
+ *
+ *  This function is a gateway which switches to the appropriate function
+ *  for the range of x.
+ *
+ *      i)  |x| < 1
+ *     ii)   x  > 1
+ *
+ *  This is because different computational methods are needed in 
+ *  each domain
+ *
+ */
+template <typename T> 
+   typename
+      std::enable_if< std::is_floating_point<T>::value, 
+                      void >::type
+   unnormalised_associated_irregular_Legendre(int const mmax, 
+                                              int const lmax,
+                                              T   const x,
+                                              std::vector<std::vector<T> > &qlm_array)
+  {
+   //
+   //---- Initialise the output vectors 
+   //
+
+   for(int lval=0; lval<=lmax; ++lval)
+      {
+       for(int mval = 0; mval<=mmax; ++mval)
+          {
+           qlm_array[lval][mval] = 0.0e+00;
+          } 
+      }
+
+   //
+   //---- We divide the x-axis including the branch cut and the 
+   //     pole at x = 1 into intervals as follows:
+   //
+   //     [-infty,-1+THRESHOLD ], Inside, [1-THRESHOLD, 1+THRESHOLD], Outside
+   //
+   //     We do not calculate for x in the middle interval around +1, nor
+   //     on the branch cut
+   //
+
+   T const MULTIPLIER = 10.0e+00;
+
+   T const EPSILON    = std::numeric_limits<T>::epsilon();
+
+   T const THRESHOLD  = MULTIPLIER * EPSILON;
+
+   //
+   //---- Classify X into one of the intervals and when appropriate
+   //     call the calculation routine.
+   //
+   
+   if( x < (-1.0e+00 + THRESHOLD) ) 
+     {
+      //
+      //.... On branch cut 
+      //
+
+      ;  
+     }
+   else if( (x > (-1.0e+00 + THRESHOLD) ) && (x < (1.0e+00 - THRESHOLD) ) )
+     {
+      //
+      //.... x in [-1,+1]
+      //
+
+      unnormalized_assoc_irregular_Legendre_small_arg(mmax,lmax,x,qlm_array);
+     }
+   else if( x > (1.0e00 + THRESHOLD) )
+     {
+      //
+      //.... x > 1 (to right of pole)
+      //
+
+      unnormalised_associated_irregular_Legendre_big_arg(mmax,lmax,x,qlm_array);
+     }
+   else
+     {
+      //
+      //.... x lies near pole at 1
+      //
+
+      ;
+     }
+      // End of selection on value of x
+
+   //
+
+   return;
+  }
+   // End of unnormalised_associated_irregular_Legendre()
 
 /**
  *  Method: power_complx_to_unsigned_int()
