@@ -38,8 +38,26 @@
 
 int main(int argc, char **argv)
   {
+   //
+   //---- Optionally select to compute one or other kind only
+   //
+
+   bool b_compute_first_kind =   true;
+
+   bool b_compute_second_kind = false;
+
+   //
+   //---- Optionally monitor floating point exceptions
+   //
+
+   bool b_monitor_fl_pt_exceptions = false;
+
+   //
+   //---- Banner header 
+   //
+
    printf("\n\n");
-   printf("     Computation of associated legendre functions \n");
+   printf("     Computation of associated Legendre functions \n");
    printf("     --------------------------------------------   ");
    printf("\n\n");
    printf("     Real argument and integer order and degree ");
@@ -109,31 +127,95 @@ int main(int argc, char **argv)
    std::vector<long double> xarg_vec;
 
    {
-    xarg = 0.5e+00; xarg_vec.push_back(xarg);
+    xarg = 0.00e+00; xarg_vec.push_back(xarg);
 
-    xarg = 1.5e+00; xarg_vec.push_back(xarg);
+    xarg = 0.25e+00; xarg_vec.push_back(xarg);
 
-    xarg = 2.0e+00; xarg_vec.push_back(xarg);
+    xarg = 0.50e+00; xarg_vec.push_back(xarg);
 
-    xarg = 2.5e+00; xarg_vec.push_back(xarg);
+    xarg = 0.75e+00; xarg_vec.push_back(xarg);
 
-    xarg = 3.0e+00; xarg_vec.push_back(xarg);
+    xarg = 0.90e+00; xarg_vec.push_back(xarg);
 
-    xarg = 3.5e+00; xarg_vec.push_back(xarg);
+    xarg = 1.25e+00; xarg_vec.push_back(xarg);
 
-    xarg = 4.0e+00; xarg_vec.push_back(xarg);
+    xarg = 1.50e+00; xarg_vec.push_back(xarg);
 
-    xarg = 4.5e+00; xarg_vec.push_back(xarg);
+    xarg = 1.75e+00; xarg_vec.push_back(xarg);
 
-    xarg = 5.0e+00; xarg_vec.push_back(xarg);
+    xarg = 2.00e+00; xarg_vec.push_back(xarg);
+
+    xarg = 2.25e+00; xarg_vec.push_back(xarg);
+
+    xarg = 2.50e+00; xarg_vec.push_back(xarg);
+
+    xarg = 2.75e+00; xarg_vec.push_back(xarg);
+
+    xarg = 3.00e+00; xarg_vec.push_back(xarg);
+
+    xarg = 3.25e+00; xarg_vec.push_back(xarg);
+
+    xarg = 3.50e+00; xarg_vec.push_back(xarg);
+
+    xarg = 3.75e+00; xarg_vec.push_back(xarg);
+
+    xarg = 4.00e+00; xarg_vec.push_back(xarg);
+
+    xarg = 4.25e+00; xarg_vec.push_back(xarg);
+
+    xarg = 4.50e+00; xarg_vec.push_back(xarg);
+
+    xarg = 4.75e+00; xarg_vec.push_back(xarg);
+
+    xarg = 5.00e+00; xarg_vec.push_back(xarg);
+
+    xarg = 5.25e+00; xarg_vec.push_back(xarg);
+
+    xarg = 5.50e+00; xarg_vec.push_back(xarg);
+
+    xarg = 5.75e+00; xarg_vec.push_back(xarg);
+
+    xarg = 6.00e+00; xarg_vec.push_back(xarg);
+
+    xarg = 6.25e+00; xarg_vec.push_back(xarg);
+
+    xarg = 6.50e+00; xarg_vec.push_back(xarg);
+
+    xarg = 6.75e+00; xarg_vec.push_back(xarg);
+
+    xarg = 7.00e+00; xarg_vec.push_back(xarg);
+
+    xarg = 7.25e+00; xarg_vec.push_back(xarg);
+
+    xarg = 7.50e+00; xarg_vec.push_back(xarg);
+
+    xarg = 7.75e+00; xarg_vec.push_back(xarg);
+
+    xarg = 8.00e+00; xarg_vec.push_back(xarg);
+
+    xarg = 8.25e+00; xarg_vec.push_back(xarg);
+
+    xarg = 8.50e+00; xarg_vec.push_back(xarg);
+
+    xarg = 8.75e+00; xarg_vec.push_back(xarg);
+
+    xarg = 9.00e+00; xarg_vec.push_back(xarg);
+
+    xarg = 9.25e+00; xarg_vec.push_back(xarg);
+
+    xarg = 9.50e+00; xarg_vec.push_back(xarg);
+
+    xarg = 9.75e+00; xarg_vec.push_back(xarg);
+
+    xarg =10.00e+00; xarg_vec.push_back(xarg);
    }
 
    //
    //---- Set the maximum L and M   
    //
 
-   int const Lmax = 20;
-   int const Mmax = 20;
+   int const Lmax = 30;
+   int const Mmax = 30;
 
    printf("\n\n");
    printf("     Maximum L value = %4d \n", Lmax);
@@ -155,8 +237,11 @@ int main(int argc, char **argv)
        printf("\n\n");
 
        //
-       //---- Regular functions 
+       //---- Regular functions at this argument 
        //
+
+       if(b_compute_first_kind)
+       {
 
        for(int m=0; m<=Mmax; ++m)
           {
@@ -177,13 +262,15 @@ int main(int argc, char **argv)
 
            unnormalised_associated_regular_Legendre(Lmax,m,x,plm_vec);
 
-           monitor_fl_pt_exceptions();
+           if(b_monitor_fl_pt_exceptions)
+             {
+              monitor_fl_pt_exceptions();
+             }
 
            //
 
-           printf("\n\n");
-           printf("     Real argument (x) = %15.6Lf ", x);
-           printf("\n\n");
+           //printf("     Real argument (x) = %15.6Lf ", x);
+           //printf("\n\n");
            printf("     Computed associated Legendre functions of the first kind (regular)");
            printf("\n\n");
            printf("      l    m        x         Associated Legendre function \n");
@@ -198,44 +285,53 @@ int main(int argc, char **argv)
           }
            // End loop over m values 
 
+       }
+        // End of optional selection on computing first kind of functions
+
        //
-       //---- Irregular functions 
+       //---- Irregular functions at this argument 
        //
 
-       std::vector<std::vector<long double> > qlm_mat;
+       if(b_compute_second_kind)
+         {
+          std::vector<std::vector<long double> > qlm_mat;
 
-       qlm_mat.resize(Lmax+1);
+          qlm_mat.resize(Lmax+1);
 
-       for(int ll=0; ll<=Lmax; ++ll)
-          {
-           qlm_mat[ll].resize(Mmax+1);
-          }
+          for(int ll=0; ll<=Lmax; ++ll)
+             {
+              qlm_mat[ll].resize(Mmax+1);
+             }
  
-       //
+          //
 
-       std::feclearexcept(FE_ALL_EXCEPT);
+          std::feclearexcept(FE_ALL_EXCEPT);
 
-       unnormalised_associated_irregular_Legendre(Mmax,Lmax,x,qlm_mat);
+          unnormalised_associated_irregular_Legendre(Mmax,Lmax,x,qlm_mat);
 
-       monitor_fl_pt_exceptions();
+          if(b_monitor_fl_pt_exceptions)
+             {
+              monitor_fl_pt_exceptions();
+             }
 
-       //
+          //
 
-       printf("\n\n");
-       printf("     Real argument (x) = %15.6Lf ", x);
-       printf("\n\n");
-       printf("     Computed associated Legendre functions of the second kind (irregular)");
-       printf("\n\n");
-       printf("      l    m        x        Associated Legendre function \n");
-       printf("     ---  ---  ------------- ---------------------------- \n");
+          printf("     Real argument (x) = %15.6Lf ", x);
+          printf("\n\n");
+          printf("     Computed associated Legendre functions of the second kind (irregular)");
+          printf("\n\n");
+          printf("      l    m        x         Associated Legendre function \n");
+          printf("     ---  ---  -------------  ---------------------------- \n");
 
-       for(int ll=0; ll<=Lmax; ++ll)
-          {
-           for(int mm=0; mm<=Mmax; ++mm)
-              {
-               printf("     %3d  %3d  %15.6Le       %15.6Le \n", ll, mm, x, qlm_mat[ll][mm]);
-              }
-          }
+          for(int ll=0; ll<=Lmax; ++ll)
+             {
+              for(int mm=0; mm<=Mmax; ++mm)
+                 {
+                  printf("     %3d  %3d  %13.7Lf  %28.14Le \n", ll, mm, x, qlm_mat[ll][mm]);
+                 }
+             }
+         }
+          // End of optional selection on computing second kind of functions
       }
        // End of loop over arguments "x"
 
@@ -244,7 +340,7 @@ int main(int argc, char **argv)
    //
 
    printf("\n\n");
-   printf("     **** End of computation of associated legendre functions");
+   printf("     **** End of computation of associated Legendre functions");
    printf("\n\n");
 
    return 0;

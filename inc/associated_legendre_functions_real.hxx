@@ -909,7 +909,7 @@ template <typename T>
            T xarg,
            std::vector<std::vector<T> > &cqmvec)
   {
-   bool const zdebug = true;
+   bool const zdebug = false;
 
    std::string const method_name_str = "unnormalized_assoc_irregular_Legendre_small_arg()";
 
