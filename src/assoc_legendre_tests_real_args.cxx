@@ -14,6 +14,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h> 
+#include <float.h>
+#include <fenv.h>
 
 #include <iostream>
 #include <iomanip>
@@ -119,6 +122,14 @@ int main(int argc, char **argv)
 
    printf(cformat_type_str.c_str(), __FILE__);
    printf("\n\n");
+
+   //
+
+   printf("     Number of bytes used to store long double = %d ", sizeof(long double));
+   printf("\n\n");
+
+   //printf("     Floating point evaluation mode is: %d ", FLT_EVAL_MODE);
+   //printf("\n\n");
 
    //
    //---- Prepare vector of arguments 
@@ -258,6 +269,11 @@ int main(int argc, char **argv)
            //..... Compute for l=m, ...., Lmax
            //
 
+           std::fesetround(FE_DOWNWARD);
+           //std::fesetround(FE_UPWARD);
+           //std::fesetround(FE_TONEAREST);
+           //std::fesetround(FE_TOWARDZERO);
+
            std::feclearexcept(FE_ALL_EXCEPT);
 
            unnormalised_associated_regular_Legendre(Lmax,m,x,plm_vec);
@@ -304,6 +320,11 @@ int main(int argc, char **argv)
              }
  
           //
+
+          std::fesetround(FE_DOWNWARD);
+          //std::fesetround(FE_UPWARD);
+          //std::fesetround(FE_TONEAREST);
+          //std::fesetround(FE_TOWARDZERO);
 
           std::feclearexcept(FE_ALL_EXCEPT);
 
