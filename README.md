@@ -20,8 +20,16 @@ Directory structure
        This driver computes the P_lm and Q_lm and may therefore
        be used to compare with the table of function values 
        reported in the research paper above.
+       
+       Code is also here to monitor the floating point exceptions using
+       functions in the C++ language. The Makefile will create a static library
+       libmonitor.a in /lib holding these functions so that they can linked 
+       into programs.
 
 ./bin  The binary for the test programs are placed in this location
+
+./lib  A directory that holds the library libmonitor.a when built by the
+       Makefile.
 
 Compilation
 -----------
