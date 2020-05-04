@@ -1,11 +1,26 @@
-/* Copyright 2018 (c) C J Gillan, H Jordan, K Dichev and B McLaughlin
- *
- * All Rights Reserved
- *
- * Unauthorized copying of any files in this repository, via any 
- * medium whatsoever is strictly prohibited.
- * 
- * This software remains copyright to the authors, and it
- * can only be used with written permission from the authors.
- *
- */
+* =================================================================
+* This file is part of “Special functions software” (hereinafter the “Software”)
+* 
+* =================================================================
+* Developers: Charles J Gillan, The Queen's University of Belfast, Northern Ireland
+* 
+* The project (“AllScale”) leading to this Software has received funding from 
+* the European Commission under its Horizon 2020 Program as contract 
+* number 671603.
+* 
+* Copyright 2020, The Queen's University of Belfast, Northern Ireland
+* Contact: IP Management (d.tierney@qub.ac.uk)
+* =================================================================
+* Licensed under the GNU General Public License, as published by the Free Software Foundation, 
+* either version 3 or at your option any later version (hereinafter the "License");
+* you must not use this Software except in compliance with the terms of the License.
+*
+* Unless required by applicable law or agreed upon in writing, THIS SOFTWARE IS 
+* DISTRIBUTED ON AN "AS IS" BASIS, WITHOUT ANY WARRANTY; WITHOUT EVEN THE IMPLIED 
+* WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, NEITHER EXPRESS 
+* NOR IMPLIED.
+* For details see terms of the License (see attached file: README). The License 
+* is also available at http://www.gnu.org/licenses/gpl.txt.
+* =================================================================
+
+
