@@ -1,15 +1,7 @@
 //************************************************************************
 //************************************************************************
 //
-//   associated_Legendre_functions_real.hxx  
-//
-//   This file implesments templates to compute regular and irregular
-//   associated Legendre functions for values on the REAL axis
-//   excluding:
-//
-//      i) The branch cut -infinity to -1 inclusive
-//
-//     ii) The other pole at +1.
+//   associated_legendre_templates.hxx  
 //
 //   Notes: 
 //
@@ -25,7 +17,7 @@
 //   NB: Need --std=c++0x (or similar) on 
 //       g++ otherwise this fails 
 //
-//   Copyright (c) 2018,2019 Charles J Gillan  
+//   Copyright (c) 2018 Charles J Gillan  
 //   All rights reserved
 //
 //************************************************************************
@@ -38,7 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <typeinfo> 
+#include <complex> 
 
 #include <iostream>
 #include <iomanip>
@@ -50,6 +42,92 @@
 
 #include <vector>
 #include <algorithm>
+
+/**
+ *  Procedure: real_factorial()
+ *
+ *  Compute factorial of integer "n"
+ *
+ *  Return floating point type only.
+ *
+ */ 
+template <typename T> 
+    typename std::enable_if<std::is_floating_point<T>::value,void>::type  
+       real_factorial(unsigned int const n, T &xfact)
+  { 
+   bool zdebug = false;
+
+   std::ostringstream os;
+
+   //
+
+   if(zdebug)
+     {
+      os.str(""); os.clear();
+
+      os << "\n\n"
+         << "          >>>>> factorial(unsigned int)"
+         << "\n\n"
+         << "          n = " << n
+         << "\n\n";
+
+      std::cout << os.str() << "\n";
+     }
+
+   //
+
+   if(0 == n)
+     {
+      xfact = 1.0e+00;
+     }
+   else if(n == 1)
+     {
+      xfact = 1.0e+00;
+     }
+   else if(n > 1)
+     {
+      unsigned int const n1 = n - 1;
+
+      T xfact_1; 
+
+      real_factorial(n1,xfact_1);
+
+      T const xtemp = static_cast<T>(n);
+
+      xfact =  xtemp * xfact_1;
+     }
+   else
+     {
+      os.str(""); os.clear();
+
+      os << "\n\n"
+         << "          **** Error: factorial(unsigned int)"
+         << "\n\n"
+         << "          n is negative;  value = " << n
+         << "\n\n";
+
+      std::cout << os.str() << "\n";
+     
+      exit(0);
+     }
+
+   //
+
+   if(zdebug)
+     {
+      os.str(""); os.clear();
+
+      os << "          Result: " << xfact 
+         << "\n\n" 
+         << "          <<<<< Completed: factorial(unsigned int)"
+         << "\n\n";
+
+      std::cout << os.str() << "\n";
+     }
+
+   return;
+  }
+   // End function factorial
 
 /**
  *   lentz_cfrac()  
@@ -616,8 +694,8 @@ template <typename T>
    typename
       std::enable_if< std::is_floating_point<T>::value, 
                       void >::type
-   unnormalised_associated_irregular_Legendre_big_arg(int const mmax, 
-                                                      int const lmax,
+   unnormalised_associated_irregular_Legendre_big_arg(int const lmax, 
+                                                      int const mmax,
                                                       T   const x,
                                                       std::vector<std::vector<T> > &qlm_array)
   {
@@ -894,513 +972,6 @@ template <typename T>
   }
    // End of unnormalised_associated_irregular_Legendre_big_arg() 
 
-
-/**
- *  Function: unnormalized_assoc_irregular_Legendre_small_arg()
- *
- *  Computes the function for |x| < 1
- *
- */
-template <typename T> 
-   typename std::enable_if<std::is_floating_point<T>::value,void>::type  
-     unnormalized_assoc_irregular_Legendre_small_arg(
-           unsigned int const mmax, 
-           unsigned int const lmax,
-           T xarg,
-           std::vector<std::vector<T> > &cqmvec)
-  {
-   bool const zdebug = false;
-
-   std::string const method_name_str = "unnormalized_assoc_irregular_Legendre_small_arg()";
-
-   //
-   //---- Debug banner header 
-   //
-
-   if(zdebug)
-     {
-      printf("\n\n");
-      printf("      ====> %s <==== ", method_name_str.c_str());
-      printf("\n\n");
-      printf("      Input data: \n");
-      printf("        Lmax (n) = %4u \n", lmax);
-      printf("        Mmax (m) = %4u   ", mmax);
-      printf("\n\n");
-
-      std::string cformat_str = " ";
-
-      if(  ( typeid(T) == typeid(double) ) ||
-           ( typeid(T) == typeid(float)  ) )
-        {
-         cformat_str = "        xarg = %10.6f  \n";
-        }
-      else if( typeid(T) == typeid(long double) )
-        {
-         cformat_str = "        xarg = %10.6Lf \n";
-        }
-
-      printf(cformat_str.c_str(), xarg);
-
-      printf("\n\n");
-      printf("      **** End of input data");
-      printf("\n\n");
-     }
-
-   //
-   //---- Establish abs(x) as a constant for rest of routine
-   //
-
-   T const xabs = std::abs(xarg);
-
-   //
-   //---- Let's establish the constants -2.0, -1.0, 0.0, 0.5, 1.0, 2.0 
-   //
-  
-   T const DMINUS2 = -2.0e+00;
-   T const DMINUS1 = -1.0e+00;
-   T const DZERO   =  0.0e+00;
-   T const DHALF   =  0.5e+00;
-   T const DONE    =  1.0e+00;
-   T const DTWO    =  2.0e+00;
-
-   //
-   //---- Initialise the output vectors 
-   //
-
-   for(int lval=0; lval<=lmax; ++lval)
-      {
-       for(int mval = 0; mval<=mmax; ++mval)
-          {
-           cqmvec[lval][mval] = DZERO;
-          } 
-      }
-
-   //
-   //--- Are we at the point +1 or -1 on the real axis.
-   //
-   //    These are the poles of the function 
-   //
-   //    We stop the computation at this point.
-   //
-   //    The threshold is somewhat arbitary here.
-   //
-
-   T const MULTIPLIER = 20.0e+00;
-
-   T const EPSILON    = std::numeric_limits<T>::epsilon();
-
-   T const THRESHOLD  = MULTIPLIER * EPSILON;
-
-   T const deltaabs   = std::abs(1.0e+00 - xabs);
-   
-   bool const x_at_pole = (deltaabs < THRESHOLD);  
-
-   if( x_at_pole )
-     {
-      std::string cformat_str = " ";
-
-      if(  ( typeid(T) == typeid(double) ) ||
-           ( typeid(T) == typeid(float)  ) )
-        {
-         cformat_str = "    Argument  xarg = %10.6f \n";
-        }
-      else if( typeid(T) == typeid(long double) )
-        {
-         cformat_str = "    Argument  xarg = %10.6Lf \n";
-        }
-
-      printf(cformat_str.c_str(), xarg);
-
-      printf("\n\n");
-      printf("     is too close to one of the poles x=-1 or x=+1 on the \n");
-      printf("     real axis.  No computation will be performed.");
-      printf("\n\n");
-
-      exit(0);
-     }
-
-   //
-   //---- Ok, "x" is not at the poles so now decide if "z" lies
-   //     inside (even on), or outside the unit circle.
-   //
-
-   T radius_unit_circle = (1.0e+00 + EPSILON); 
-
-   //
-
-   bool const x_outside_unit_circle = xabs > radius_unit_circle;
-
-   //
-
-   if(zdebug)
-     {
-      std::string cformat_str = " ";
-
-      if(  ( typeid(T) == typeid(double) ) ||
-           ( typeid(T) == typeid(float) ) )
-        {
-         cformat_str = "      Absolute value of xarg = %13.6f - unit radius = %23.13e  ";
-        }
-      else if( typeid(T) == typeid(long double) )
-        {
-         cformat_str = "      Absolute value of xarg = %13.6Lf - unit radius = %23.18Le ";
-        }
-
-      printf(cformat_str.c_str(), xabs, radius_unit_circle);
-      printf("\n\n");
-
-      //
-
-      if(x_outside_unit_circle)
-        {
-         printf("      Argument, xarg, lies outside the unit circle");
-         printf("\n\n");
-         printf("      This routine does not work for that region ");
-         printf("\n\n");
-
-         return;
-        }
-      else
-        {
-         printf("      Argument, xarg, lies on or inside the unit circle");
-         printf("\n\n");
-        }
-     }
-
-   //
-   //---- Inside or outside the unit circle, we use the
-   //     same formula, but where a constant factor 
-   //     is defined differently for these two cases.
-   //
-   //     Let's now set that factor.
-   //
-
-   T const xls_factor = 1.0e+00; 
-
-   //
-   //---- Next compute some auxiliary variables 
-   //
-
-   T const xsqd = xarg * xarg;
-
-   T const xone_minus_xsqd = DONE - xsqd;
-
-   T const xs = xls_factor * xone_minus_xsqd;
-
-   T const xq = std::sqrt(xs);  
-
-   //
-   //---- Computation of zcq0 
-   //
-   //      (1/2) * log ( abs( (x + 1) / (x - 1) ) )
-   //
-   //     The factor s represent zls_factor above.
-   //
-
-   T const x_plus_one  = xarg + DONE; 
-
-   T const x_minus_one = xarg - DONE;
-
-   T const xtempor1 = x_plus_one / x_minus_one;
-
-   T const xtempor2 = std::abs( xtempor1 );
-
-   T const xtempor3 = std::log(xtempor2); 
-
-   T const xq0      = DHALF * xtempor3;
-  
-   // 
-
-   if(zdebug)
-     {
-      T testprint = 0.0e+00;
-
-      std::string cformat_str = " ";
-
-      if(  ( typeid(T) == typeid(double) ) ||
-           ( typeid(T) == typeid(float) ) )
-        {
-         cformat_str = "      xq0 = %13.6e "; 
-        }
-      else if( typeid(T) == typeid(long double) )
-        {
-         cformat_str = "      xq0 = %13.6Le "; 
-        }
-
-      printf(cformat_str.c_str(), xq0); 
-      printf("\n\n");
-     }
-
-   //===============================================================
-   //
-   //   I N S I D E / O N  U N I T  C I R C L E  -  A B S ( Z ) <= 1 
-   //
-   //===============================================================
-   //
-   //---- We can apply upwards recursion 
-   //
-   //     So we start by setting the 
-   //
-   //        l=0, m=0   
-   //        l=1, m=0
-   //        l=0, m=1
-   //        l=1, m=1
-   //
-   //     quadruplet to start the upwards recursion.
-   //
-   //     Remember that the index in the vector is [l][m]
-   //
-
-   //
-   //----  Q (l=0,m=0)
-   //
-
-   cqmvec[0][0] = xq0;
-
-   //
-   //----  Q (l=1, m=0)
-   //
-
-   {
-    T const temp10 = xarg * xq0;
-
-    cqmvec[1][0] = temp10 - DONE;
-   }
-
-   //
-   //----  Q (l=0, m=1)
-   //
-      
-   cqmvec[0][1] = DMINUS1 / xq;
- 
-   //
-   //---- Q (l=1, m=1)
-   //
-
-   {
-    T const x_over_one_minus_xsqd = xarg / xone_minus_xsqd;
-
-    T const xbracket = xq0 + x_over_one_minus_xsqd;
-
-    T const xproduct = xq * xbracket;
- 
-    cqmvec[1][1] = DMINUS1 * xproduct;
-   }
-
-   //
-   //---- Ok, we apply recursion now to generate others.
-   //
-   //     We set m=0 and m=1 and work from l=2,..., lmax
-   //
-
-   for(int mval=0; mval<=1; ++mval)
-      {
-       for(int lval=2; lval<=lmax; ++lval)
-          {
-           //
-           //.... Build up the nominator as a floating point number 
-           //
-           //     Start with the factors depending on l,m in brackets
-           //
-
-           int const ibracket_first  = 2*lval - 1;
-
-           int const ibracket_second = lval + mval - 1;
-
-           T const dbracket_first    = static_cast<T>(ibracket_first);
-
-           T const dbracket_second   = static_cast<T>(ibracket_second);
-
-           //
-
-           T const xfirst_term  = dbracket_first * xarg * cqmvec[lval-1][mval];
-
-           T const xsecond_term = dbracket_second * cqmvec[lval-2][mval]; 
-
-           T const xnumerator   = xfirst_term - xsecond_term;
-
-           //
-           //.... Build up the denominator as a floating point number
-           //
-
-           int const itemp = lval - mval;
-
-           T   const xdenominator = static_cast<T>(itemp);
-
-           //
-
-           cqmvec[lval][mval] = xnumerator / xdenominator;
-          }
-           // End loop over lval 
-      }
-       // End loop over mval 
-
-   //
-   //---- Complete the recursion by working on 
-   //
-   //     l = 0 ,..., lmax and m = 2, ..., mmax
-   //
-
-   for(int lval=0; lval<=lmax; ++lval)
-      {
-       for(int mval=2; mval<=mmax; ++mval)
-          {
-           //
-           //.... Build up the brackets complex numbers
-           //
-
-           int const ibracketa = mval - 1;
-
-           int const ibracketb = lval + mval - 1;
-
-           int const ibracketc = lval - mval + 2;
-
-           T const dbracketa   = static_cast<T>(ibracketa);
-
-           T const dbracketb   = static_cast<T>(ibracketb);
-
-           T const dbracketc   = static_cast<T>(ibracketc);
-
-           //
-           //.... First term 
-           //
-
-           T const xfirst_tempa = DMINUS2 * dbracketa;
-
-           T const xfirst_tempb = xfirst_tempa * xarg;
-
-           T const xfirst_tempc = xfirst_tempb * cqmvec[lval][mval-1]; 
-
-           T const xfirst_term  = xfirst_tempc / xq;
-
-           //
-           //.... Second term
-           //
-
-           T const xsecond_tempa = dbracketb * dbracketc;
-
-           T const xsecond_tempb = xsecond_tempa * cqmvec[lval][mval-2];
-
-           T const xsecond_term  = xsecond_tempb * xls_factor;
-
-           //
-
-           cqmvec[lval][mval] = xfirst_term - xsecond_term;
-          }
-           // End loop over mval 
-      }
-       // End loop over lval
-
-   //
-   //---- Return point 
-   //
-
-   if(zdebug)
-     {
-      printf("\n\n");
-      printf("      **** Completed - %s ", method_name_str.c_str());
-      printf("\n\n");
-     }
-
-   return;
-  }
-   // End of generation of the Q(l,m) values() |x| < 1
-
-/**
- *  Function: unnormalized_assoc_irregular_Legendre()
- *
- *  This function is a gateway which switches to the appropriate function
- *  for the range of x.
- *
- *      i)  |x| < 1
- *     ii)   x  > 1
- *
- *  This is because different computational methods are needed in 
- *  each domain
- *
- */
-template <typename T> 
-   typename
-      std::enable_if< std::is_floating_point<T>::value, 
-                      void >::type
-   unnormalised_associated_irregular_Legendre(int const mmax, 
-                                              int const lmax,
-                                              T   const x,
-                                              std::vector<std::vector<T> > &qlm_array)
-  {
-   //
-   //---- Initialise the output vectors 
-   //
-
-   for(int lval=0; lval<=lmax; ++lval)
-      {
-       for(int mval = 0; mval<=mmax; ++mval)
-          {
-           qlm_array[lval][mval] = 0.0e+00;
-          } 
-      }
-
-   //
-   //---- We divide the x-axis including the branch cut and the 
-   //     pole at x = 1 into intervals as follows:
-   //
-   //     [-infty,-1+THRESHOLD ], Inside, [1-THRESHOLD, 1+THRESHOLD], Outside
-   //
-   //     We do not calculate for x in the middle interval around +1, nor
-   //     on the branch cut
-   //
-
-   T const MULTIPLIER = 10.0e+00;
-
-   T const EPSILON    = std::numeric_limits<T>::epsilon();
-
-   T const THRESHOLD  = MULTIPLIER * EPSILON;
-
-   //
-   //---- Classify X into one of the intervals and when appropriate
-   //     call the calculation routine.
-   //
-   
-   if( x < (-1.0e+00 + THRESHOLD) ) 
-     {
-      //
-      //.... On branch cut 
-      //
-
-      ;  
-     }
-   else if( (x > (-1.0e+00 + THRESHOLD) ) && (x < (1.0e+00 - THRESHOLD) ) )
-     {
-      //
-      //.... x in [-1,+1]
-      //
-
-      unnormalized_assoc_irregular_Legendre_small_arg(mmax,lmax,x,qlm_array);
-     }
-   else if( x > (1.0e00 + THRESHOLD) )
-     {
-      //
-      //.... x > 1 (to right of pole)
-      //
-
-      unnormalised_associated_irregular_Legendre_big_arg(mmax,lmax,x,qlm_array);
-     }
-   else
-     {
-      //
-      //.... x lies near pole at 1
-      //
-
-      ;
-     }
-      // End of selection on value of x
-
-   //
-
-   return;
-  }
-   // End of unnormalised_associated_irregular_Legendre()
-
 /**
  *  Method: power_complx_to_unsigned_int()
  *
@@ -1495,6 +1066,338 @@ template <typename T>
    return zpow;
   }
    // End of template power_complx_to_unsigned_int()
+
+/**
+ *                                                                      
+ *     Calculates the regular associated legendre function  P  ( z )    
+ *                                                           l,m       
+ *     l,m are positive integers                            
+ *     z   complex and |z| > (1.0 + eps) 
+ *                     
+ *     This works on the real axis - just set the complex part of the 
+ *     number "z" to zero on calling the function.
+ *  
+ *     Developed from a Fortran 77 version by Bell and McLaughlin (1983)
+ *     That version was never published.                                          
+ *
+ */
+template <typename T> 
+   typename std::enable_if<std::is_floating_point<T>::value,void>::type 
+     cplm(unsigned int const l, 
+          unsigned int const m,
+          std::complex<T> const z,
+          std::complex<T> &zretVal)                                  
+  {
+   std::complex<T> const ZERO(0.0e+00, 0.0e+00); 
+   std::complex<T> const ZONE(1.0e+00, 0.0e+00); 
+   std::complex<T> const ZTWO(2.0e+00, 0.0e+00);
+
+   //
+
+   T const  DTHRESHOLD_POLE = 0.01e+00; 
+
+   T const  DHALF = 0.5d+00;
+   T const  DONE  = 1.0d+00;
+   T const  DTWO  = 2.0d+00;
+
+   //
+
+   bool const zdebug = false;
+
+   //
+
+   std::ostringstream os;
+
+   //
+   //---- Debug banner header 
+   //
+
+   if(zdebug)
+     {
+      os.str(""); os.clear();
+
+      os << "\n\n"
+         << "     >>>> cplm - compute regular associated Legendre functions - complex plane "
+         << "\n\n"
+         << "     Input data: "  
+         << " l = " << l 
+         << " m = " << m 
+         << " z = " << z 
+         << "\n\n";
+
+      std::cout << os.str() << "\n";
+     }
+
+   //
+   //---- Default the return value
+   //
+
+   zretVal = ZERO;
+
+   //
+   //---- Check arguments
+   //
+   //     l should be >= 0   - controlled via arg type - insigned int  
+   //     m should be [0,+l] - unsigned int so guarantee to in [0,...]
+   //
+   //     z should NOT be on the branch cut [-infinity,-1] or near z=1.
+   //
+
+   if(m > l)
+     {
+      os.str(""); os.clear();
+
+      os << "\n\n"
+         << "     ***** Error in cplm - compute associated Legendre functions"
+         << "\n\n"
+         << "     l is greater than m " 
+         << "\n\n"
+         << "     l = " << std::setw(3) << l << " m = " << std::setw(3) << m
+         << "\n";
+
+      std::cout << os.str() << "\n";
+
+      exit(-1);
+     }
+
+   //
+
+   T const realPart = z.real();
+   T const imagPart = z.imag();
+
+   bool const b_on_branch_cut = (realPart           < -0.99e+00) && 
+                                (std::abs(imagPart) < 0.01e+00);
+
+   bool const b_near_positive_pole = (std::abs(realPart - 1.0e+00) < DTHRESHOLD_POLE ) &&
+                                     (std::abs(imagPart)           < 0.01e+00);
+
+
+   if( b_on_branch_cut || b_near_positive_pole )
+     {
+      os.str(""); os.clear();
+
+      os << "\n\n"
+         << "     ***** Error in cplm - compute associated Legendre functions"
+         << "\n\n";
+
+      if( b_on_branch_cut )
+        {
+         os << "     z is on the branch cut [-infinity,-1] "; 
+        }
+      else if( b_near_positive_pole )
+        {
+         os << "     z is near the pole at z=1 ";
+        }
+      else
+        {
+         os << "     Unknown error ";
+        }
+
+      os << "\n\n"
+         << "     z = ( "
+         << std::scientific << std::setw(13) << std::setprecision(7) 
+         << z.real() << " , " << z.imag() << " ) " 
+         << "   "
+         << "\n";
+
+      std::cout << os.str() << "\n";
+
+      exit(-1);
+     } 
+
+   //
+   //---- Prepare values for use in computation
+   //
+
+   int    lm  = l - m;                       
+
+   int    lm2 = lm/2;                                                    
+
+   //
+   //---- First deal with term (ir = 0)
+   //
+   //               (2 * l)!
+   //        ---------------------------   *  z^(l - m)
+   //          (2^l) * (l!) * (l - m)! 
+   //
+   //     The pow() function gets bad press seeingly for int
+   //     arguments, since it works with real numbers. So, let's
+   //     roll our own here.
+   //
+
+   int const  itwo_l = 2*l;
+
+   //
+
+   if(l < 0)
+     {
+      os.str(""); os.clear();
+
+      os << "\n\n"
+         << "     ***** Error in cplm " 
+         << "\n\n"
+         << "     \"l\" is negative. "  
+         << "\n\n";
+
+      std::cout << os.str() << "\n";
+
+      exit(0);
+     }
+
+   //
+   //---- Fast computation of 2^l 
+   //
+
+   int itwo_power_l = 0;
+
+   if(0 == l)
+     {
+      itwo_power_l = 1;
+     }
+   else if(1 == l)
+     {
+      itwo_power_l = 2;
+     }
+   else if( (l>=2) && (l<=31) )
+     {
+      itwo_power_l = 2 << (l - 1);
+     }
+   else
+     {
+      exit(1);
+     }
+
+   T const xtwo_power_l = static_cast<T>(itwo_power_l);
+
+   if(zdebug)
+     {
+      os.str(""); os.clear();
+
+      os << "\n\n"
+         << "     l = " << l << ",  2^l = " << itwo_power_l << " and as float = " << xtwo_power_l
+         << "\n\n";
+
+      std::cout << os.str() << "\n";
+
+     } 
+
+   //
+   //---- Compute the required factorials
+   //
+
+   T l_factorial = 0.0e+00;
+
+   real_factorial(l, l_factorial);
+
+   //
+
+   T lm_factorial = 0.0e+00;
+
+   real_factorial(lm, lm_factorial);
+
+   //
+
+   T two_l_factorial = 0.0e+00;
+
+   real_factorial(itwo_l,two_l_factorial); 
+
+   //
+   //---- Put the pieces together to compute the first term 
+   //
+
+   T const denominator = xtwo_power_l * l_factorial * lm_factorial;   
+                
+   T       wlmro       = two_l_factorial / denominator;                  
+
+   std::complex<T> zwlmro;
+
+   zwlmro.real(wlmro);  zwlmro.imag(0.0e+00);
+
+   //
+
+   std::complex<T> zpow = power_complx_to_unsigned_int<T>(z,lm);
+
+   std::complex<T> zsum = zwlmro * zpow;
+
+   //
+   //---- Now deal with terms ir = 1, 2, ... lm2 - indeed if any 
+   //                                  
+   //     We compute the following term, "wlmr",  at each value "ir" 
+   //
+   //            -1 * (l - m - 2*ir + 2) * (l - m -2*ir + 1)
+   //           --------------------------------------------- * z^(l - m - 2*ir)
+   //                 (2*ir) * ( 2(l - ir) + 1 )
+   //
+   //     Note the product relationship as we save this to "wlmro" and reuse
+   //     at next iteration.
+   //
+ 
+   for(int ir=1; ir<=lm2; ++ir)
+      {
+       int const lmir = lm - 2*ir;                                                 
+       int const jlir = l  - ir;                                                  
+
+       T wlmr = -wlmro*(static_cast<T>(lmir) + DTWO)*(static_cast<T>(lmir) + DONE);                       
+       
+       wlmr = wlmr/(DTWO*static_cast<T>(ir)*(DTWO*static_cast<T>(jlir)+ DONE));                
+
+       //
+
+       std::complex<T> zwlmr;
+
+       zwlmr.real(wlmr); zwlmr.imag(0.0e+00);
+
+       //
+
+       std::complex<T> const zpowterm = power_complx_to_unsigned_int<T>(z,lmir);
+
+       std::complex<T> const t = zwlmr * zpowterm;                                             
+
+       zsum  = zsum + t;                                                    
+         
+       wlmro = wlmr;                                                  
+      }                                                         
+
+   //
+   //---- Now set the final value into the variable "p"
+   //
+
+   if(m == 0)
+     {                                             
+      zretVal = zsum;
+     }                               
+   else
+     {                                             
+      T const xn  = static_cast<T>(m) * DHALF;                                          
+
+      std::complex<T> const zsqd   = z*z;
+
+      std::complex<T> const ztemp  = zsqd - ZONE;
+
+      std::complex<T> const ztemp2 = std::pow(ztemp, xn);
+
+      zretVal = ztemp2 * zsum;                             
+     }  
+
+   //
+   //---- Return point 
+   //
+
+   if(zdebug)
+     {
+      os.str(""); os.clear();
+
+      os << "     Computed value of associated Legendre polynomial = " 
+         << "(" << zretVal.real() << ", " << zretVal.imag() << ") " 
+         << "\n\n"
+         << "     ***** cplm - completed \n";
+
+      std::cout << os.str() << "\n";
+     }
+
+   return;
+  }
+   // End function cplm 
 
 #endif // For #ifdef _ASSOC_LEGENDRE_TEMPLATED_REAL_INCLUDE_176492_H_
 

@@ -6,8 +6,9 @@
 #
 #  Source code is located in ./src
 #
-#  Exdcutables are placed in ./bin
+#  Executables are placed in ./bin
 #
+#  Libraries   are placed in ./lib
 #
 
 PROJ_DIR = $(PWD)
@@ -15,8 +16,6 @@ PROJ_DIR = $(PWD)
 PROJ_INC = $(PROJ_DIR)/inc
 
 PROJ_SRC = $(PROJ_DIR)/src
-
-PROJ_LIB = $(PROJ_DIR)/lib
 
 PROJ_BIN = $(PROJ_DIR)/bin
 
@@ -29,12 +28,6 @@ CXXOPTS = -O3 -std=c++0x
 CXXOPTS += -v 
 
 #
-
-AR = ar 
-
-AROPTS = -crv 
-
-#
 #---- Includes 
 #
 
@@ -44,9 +37,7 @@ INCS = -I$(PROJ_INC)
 #---- Libraries for the linker 
 #
 
-LIBDIRS = -L $(PROJ_LIB)
-
-LIBS= -lmonitor -lm -lrt 
+LIBS=-lm -lrt 
 
 #
 #---- Build rules 
@@ -54,19 +45,12 @@ LIBS= -lmonitor -lm -lrt
 #     Separate rule for each teet harness
 #
 
-all: clean monitorlib cplm testreal testcmplx 
+all: clean testzhangjin testreal testcmplx 
 
-monitorlib:
-	$(CXX) $(INCS) $(CXXOPTS) -c   \
-               -o $(PROJ_SRC)/monitor_fl_pt_exceptions.o \
-               $(PROJ_SRC)/monitor_fl_pt_exceptions.cxx 
-	$(AR)  $(AROPTS) $(PROJ_LIB)/libmonitor.a \
-               $(PROJ_SRC)/monitor_fl_pt_exceptions.o    
-
-cplm:
+testzhangjin:
 	$(CXX) $(INCS) $(CXXOPTS) $(LIBDIRS)  \
-               -o $(PROJ_BIN)/cplm.x \
-               $(PROJ_SRC)/cplm.cxx $(LIBS) 
+               -o $(PROJ_BIN)/zhang_jin_plm.x \
+               $(PROJ_SRC)/zhang_jin_plm.cxx $(LIBS) 
 
 testreal:
 	$(CXX) $(INCS) $(CXXOPTS) $(LIBDIRS) \
@@ -79,7 +63,7 @@ testcmplx:
                   $(PROJ_SRC)/assoc_legendre_tests_cmplx_args.cxx $(LIBS) 
 
 clean:
-	$(RM) -vf $(PROJ_BIN)/*.x $(PROJ_SRC)/*.o $(PROJ_LIB)/*.a 
+	$(RM) -vf $(PROJ_BIN)/*.x $(PROJ_SRC)/*.o 
 
 #
 #---- End of file 

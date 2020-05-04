@@ -1,7 +1,7 @@
 //************************************************************************
 //************************************************************************
 //
-//   File: associated_legendre_functions_complex.hxx  
+//   File: zhang_jin.cxx  
 //
 //   This file implements the equations for the computation of
 //   associated Legendre polynamicals of the first and second 
@@ -25,10 +25,6 @@
 //************************************************************************
 //************************************************************************
 
-#ifndef _ASSOC_LEGENDRE_TEMPLATED_COMPLEX_INCLUDE_176496_H_
-
-#define _ASSOC_LEGENDRE_TEMPLATED_COMPLEX_INCLUDE_176496_H_  1
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -38,105 +34,227 @@
 #include <sstream>
 
 #include <cmath>
+#include <cfenv>
 #include <climits> 
 #include <cfloat> 
 #include <vector>
 #include <algorithm>
 #include <complex>
 #include <cstdint>
-#include <typeinfo>
+
+//#include "associated_legendre_functions.hxx"
+  
+void complex_unnormalized_assoc_regular_legendre(
+           unsigned int const m, 
+           unsigned int const n,
+           std::complex<double> z,
+           std::vector<std::vector<std::complex<double> > > &cpmvec);
+
+void complex_unnormalized_assoc_irregular_legendre(
+           unsigned int const mmax, 
+           unsigned int const lmax,
+           std::complex<double> z,
+           std::vector<std::vector<std::complex<double> > > &zcqmvec);
+
+#pragma STDC FENV_ACCESS ON
 
 /**
- *   real_factorial()
+ *   Main program - test harness
  *
- *   Compute factorial of "n" using floating point 
- *
- */ 
-template <typename T> 
-    typename std::enable_if<std::is_floating_point<T>::value,void>::type  
-       real_factorial(unsigned int const n, T &xfact)
-  { 
-   T res;
+ */
 
-   bool zdebug = false;
+int main(int argc, char **argv)
+  {
+   int const Lmax = 5;
 
-   std::ostringstream os;
+   int const Mmax = 5;
+
+   std::complex<double> z;
+
+   //===================================================================
+   //
+   //   T E S T   R E G U L A R   A S S O C I A T E D   L E G E N D R E 
+   //
+   //===================================================================
+
+   std::cout << "      Numeric limits   \n";
+   std::cout << "      -------------- \n\n";
+   std::cout << "      int:             \n"; 
+   std::cout << "        Minimum value: " << std::numeric_limits<int>::min()        << '\n';
+   std::cout << "        Maximum value: " << std::numeric_limits<int>::max()        << '\n';
+   std::cout << "        int is signed: " << std::numeric_limits<int>::is_signed    << '\n';
+   std::cout << "        Non-sign bits: " << std::numeric_limits<int>::digits       << '\n';
+   std::cout << "        has infinity:  " << std::numeric_limits<int>::has_infinity << '\n';
+   std::cout << "      float:           \n";
+   std::cout << "        minimum value : " << FLT_MIN        << "\n";
+   std::cout << "        maximum value : " << FLT_MAX        << "\n";
+   std::cout << "        epsilon       : " << FLT_EPSILON    << "\n";
+   std::cout << "        exponent radix: " << FLT_RADIX      << "\n";
+   std::cout << "      double:           \n";
+   std::cout << "        minimum value : " << DBL_MIN        << "\n";
+   std::cout << "        maximum value : " << DBL_MAX        << "\n";
+   std::cout << "        epsilon       : " << DBL_EPSILON    << "\n";
+   std::cout << "      long double:      \n";
+   std::cout << "        minimum value : " << LDBL_MIN       << "\n";
+   std::cout << "        maximum value : " << LDBL_MAX       << "\n";
+   std::cout << "        epsilon       : " << LDBL_EPSILON   << "\n";
+
+   //===================================================================
+   //
+   //   T E S T   R E G U L A R   A S S O C I A T E D   L E G E N D R E 
+   //
+   //===================================================================
+
+   std::vector<std::vector<std::complex<double> > > cpmvec;
+
+   cpmvec.resize(Lmax+1);
+
+   for(int lval=0; lval<=Lmax; ++lval)
+      {
+       cpmvec[lval].resize(lval+1);
+
+       for(int mval=0; mval<=lval; ++mval)
+          {
+           cpmvec[lval][mval].real(0.0e+00);
+           cpmvec[lval][mval].imag(0.0e+00);
+          }
+      }
 
    //
 
-   if(zdebug)
+   z.real(2.5e+00); z.imag(0.0e+00);
+
+   //
+   //---- Clear all floating point exceptions
+   //     before calling the compute method and 
+   //     then test after the call for such 
+   //     exceptions.
+   //
+ 
+   std::feclearexcept(FE_ALL_EXCEPT);
+
+   complex_unnormalized_assoc_regular_legendre(Lmax, Lmax, z, cpmvec);
+
+   if(std::fetestexcept(FE_ALL_EXCEPT))
      {
-      os.str(""); os.clear();
+      if(std::fetestexcept(FE_DIVBYZERO)) 
+        {
+         printf("      **** Error: division by zero reported during computation    \n");
+         printf("                  of the irregular associated Legendre functions.   ");
+         printf("\n\n");
+        }
 
-      os << "\n\n"
-         << "          >>>>> factorial(unsigned int)"
-         << "\n\n"
-         << "          n = " << n
-         << "\n\n";
+      if(std::fetestexcept(FE_INEXACT)) 
+        {
+         printf("      **** Error: inexact computation reported during computation \n");
+         printf("                  of the irregular associated Legendre functions.   ");
+         printf("\n\n");
+        }
 
-      std::cout << os.str() << "\n";
+      if(std::fetestexcept(FE_INVALID)) 
+        {
+         printf("      **** Error: invalid computation reported during computation \n");
+         printf("                  of the irregular associated Legendre functions.   ");
+         printf("\n\n");
+        }
+
+      if(std::fetestexcept(FE_OVERFLOW)) 
+        {
+         printf("      **** Error: overflow reported during computation of the \n");
+         printf("                  irregular associated Legendre functions.      ");
+         printf("\n\n");
+        }
+
+      if(std::fetestexcept(FE_UNDERFLOW)) 
+        {
+         printf("      **** Error: underflow reported during computation of the \n");
+         printf("                  irregular associated Legendre functions.       ");
+         printf("\n\n");
+        }
      }
+      // End of test on floating point exceptions being raised
 
    //
 
-   xfact = 0.0e+00;
+   printf("\n\n");
+   printf("     Complex argument (z) = (%15.6f,%15.6f) ", z.real(), z.imag());
+   printf("\n\n");
+   printf("      Computed associated Legendre functions of the first kind (polynomials)");
+   printf("\n\n");
+   printf("      Note that these values are complex numbers in general");
+   printf("\n\n");
+
+   for(int m=0; m<=Lmax; ++m)
+      {
+       for(int l=m; l<=Lmax; ++l)
+          {
+           printf("      l=%2d m=%2d   (%13.6e, %13.6e) \n", l, m, cpmvec[l][m].real(), cpmvec[l][m].imag());
+          }
+      }
+
+   //=====================================================================
+   //
+   //   T E S T  I R R E G U L A R   A S S O C I A T E D   L E G E N D R E 
+   //
+   //=====================================================================
+
+   std::vector<std::vector<std::complex<double> > > cqmvec;
+
+   cqmvec.resize(Lmax+1);
+
+   for(int lval=0; lval<=Lmax; ++lval)
+      {
+       cqmvec[lval].resize(Mmax+1);
+
+       for(int mval=0; mval<=Mmax; ++mval)
+          {
+           cqmvec[lval][mval].real(0.0e+00);
+           cqmvec[lval][mval].imag(0.0e+00);
+          }
+      }
 
    //
 
-   if(0 == n)
-     {
-      res = 1.0e+00;
-     }
-   else if(n == 1)
-     {
-      res = 1.0e+00;
-     }
-   else if(n > 1)
-     {
-      int const n1 = n - 1;
-
-      T ttemp;
-
-      real_factorial(n1,ttemp);
-
-      res = ( static_cast<T>(n) ) * ttemp;
-     }
-   else
-     {
-      os.str(""); os.clear();
-
-      os << "\n\n"
-         << "          **** Error: real_factorial(unsigned int)"
-         << "\n\n"
-         << "          n is negative;  value = " << n
-         << "\n\n";
-
-      std::cout << os.str() << "\n";
-     
-      exit(0);
-     }
+   z.real(2.5e+00); z.imag(0.0e+00);
 
    //
 
-   if(zdebug)
-     {
-      os.str(""); os.clear();
-
-      os << "          Result: " << res 
-         << "\n\n" 
-         << "          <<<<< Completed: real_factorial(unsigned int)"
-         << "\n\n";
-
-      std::cout << os.str() << "\n";
-     }
+   complex_unnormalized_assoc_irregular_legendre(Mmax, Lmax, z, cqmvec);
 
    //
 
-   xfact = res;
+   printf("\n\n ");
 
-   return;  
+   for(int icol=2; icol <=72; ++icol) printf("-");
+
+   printf("\n\n");
+   printf("     Complex argument (z) = (%15.6f,%15.6f) ", z.real(), z.imag());
+   printf("\n\n");
+   printf("     Computed associated Legendre functions of the second kind (irregular)");
+   printf("\n\n");
+   printf("     Note that these values are complex numbers in general");
+   printf("\n\n");
+
+   printf("     index  l    m               z                        |z|        Associated Legendre function \n");
+   printf("     ----- ---  ---  ------------------------------  -------------  ----------------------------- \n");
+
+   for(int m=0; m<=Mmax; ++m)
+      {
+       for(int l=0; l<=Lmax; ++l)
+          {
+           printf("     %5d %3d  %3d  (%13.6e, %13.6e)  %13e  (%13e,%13e) \n",  
+             0, l, m, 
+             z.real(), z.imag(),  
+             std::abs(z),
+              cqmvec[l][m].real(), cqmvec[l][m].imag());
+          }
+      }
+
+   printf("\n\n");
+   printf("     **** Completed computations ");
+   printf("\n\n");
   }
-   // End function factorial()
+   // End of main
 
 /**
  *  Function: complex_unnormalized_assoc_regular_legendre()
@@ -159,13 +277,11 @@ template <typename T>
  *         
  *
  */
-template <typename T> 
-   typename std::enable_if<std::is_floating_point<T>::value,void>::type  
-     complex_unnormalized_assoc_regular_legendre(
-           unsigned int const mmax, 
-           unsigned int const lmax,
-           std::complex<T> z,
-           std::vector<std::vector<std::complex<T> > > &cpmvec)
+void complex_unnormalized_assoc_regular_legendre(
+           unsigned int const m, 
+           unsigned int const n,
+           std::complex<double> z,
+           std::vector<std::vector<std::complex<double> > > &cpmvec)
   {
    bool const zdebug = true;
 
@@ -181,24 +297,10 @@ template <typename T>
       printf("      ====> %s <==== ", method_name_str.c_str());
       printf("\n\n");
       printf("      Input data: \n");
-      printf("        Lmax (m) = %4u \n", lmax);
-      printf("        Mmax (n) = %4u   ", mmax);
+      printf("        Lmax (m) = %4u \n", m);
+      printf("        Mmax (n) = %4u   ", n);
       printf("\n\n");
-
-      std::string cformat_str = " ";
-
-      if(  ( typeid(T) == typeid(double) ) ||
-           ( typeid(T) == typeid(float)  ) )
-        {
-         cformat_str = "        z = (%10.6f,%10.6f) \n";
-        }
-      else if( typeid(T) == typeid(long double) )
-        {
-         cformat_str = "        z = (%10.6Lf,%10.6Lf) \n";
-        }
-
-      printf(cformat_str.c_str(), z.real(), z.imag());
-
+      printf("        z = (%10.6f,%10.6f) \n", z.real(), z.imag());
       printf("\n\n");
       printf("      **** End of input data");
       printf("\n\n");
@@ -212,16 +314,16 @@ template <typename T>
    //     of the compiler 
    //
 
-   std::complex<T> ZERO; std::complex<T> ZONE; std::complex<T> ZTWO;
+   std::complex<double> ZERO;  std::complex<double> ZONE;  std::complex<double> ZTWO;
 
-   ZERO.real(0.0e+00);   ZONE.real(1.0e+00);   ZTWO.real(2.0e+00);
-   ZERO.imag(0.0e+00);   ZONE.imag(0.0e+00);   ZTWO.imag(0.0e+00);
+   ZERO.real(0.0e+00);         ZONE.real(1.0e+00);         ZTWO.real(2.0e+00);
+   ZERO.imag(0.0e+00);         ZONE.imag(0.0e+00);         ZTWO.imag(0.0e+00);
 
    //
    //---- Initialise the output vectors 
    //
 
-   for(int lval=0; lval<=lmax; ++lval)
+   for(int lval=0; lval<= n; ++lval)
       {
        for(int mval = 0; mval<=lval; ++mval)
           {
@@ -242,15 +344,15 @@ template <typename T>
    //--- Are we at the point +1 or -1 on the real axis.
    //
 
-   T const drealabs = z.real();
-   T const dimagabs = z.imag();
+   double const drealabs = z.real();
+   double const dimagabs = z.imag();
 
-   bool const z_is_real_and_abs_is_1 = (drealabs == 1.0e+00) && 
-                                       (dimagabs == 0.0e+00);
+   bool const z_is_real_and_abs_is_1 = (drealabs == 1.0D+00) && 
+                                       (dimagabs == 0.0D+00);
 
    //
 
-   T const zabs = std::abs(z);
+   double const zabs = std::abs(z);
 
    bool const z_inside_unit_circle  = zabs < 1.0e+00;
 
@@ -260,19 +362,7 @@ template <typename T>
 
    if(zdebug)
      {
-      std::string cformat_str = " ";
-
-      if(  ( typeid(T) == typeid(double) ) ||
-           ( typeid(T) == typeid(float)  ) )
-        {
-         cformat_str = "      Absolute value of z = %13.6f ";
-        }
-      else if( typeid(T) == typeid(long double) )
-        {
-         cformat_str = "      Absolute value of z = %13.6f ";
-        }
-
-      printf(cformat_str.c_str(), zabs);
+      printf("      Absolute value of z = %13.6f ", zabs);
       printf("\n\n");
 
       if(z_is_real_and_abs_is_1)
@@ -335,7 +425,7 @@ template <typename T>
    //     Let's now set that factor.
    //
 
-   std::complex<T> zls_factor; 
+   std::complex<double> zls_factor; 
 
    if(z_inside_unit_circle)
      {
@@ -352,13 +442,13 @@ template <typename T>
    //---- Next compute some auxiliary variables 
    //
 
-   std::complex<T> const zsqd = z * z;
+   std::complex<double> const zsqd = z * z;
 
-   std::complex<T> const zone_minus_zsqd = ZONE - zsqd;
+   std::complex<double> const zone_minus_zsqd = ZONE - zsqd;
 
-   std::complex<T> const zs = zls_factor * zone_minus_zsqd;
+   std::complex<double> const zs = zls_factor * zone_minus_zsqd;
 
-   std::complex<T> const zq = std::sqrt(zs);  
+   std::complex<double> const zq = std::sqrt(zs);  
 
    //
    //---- Apply the recursion formula along the diagnonal
@@ -373,19 +463,19 @@ template <typename T>
    //
    //    
 
-   for(int ll = 1; ll<= mmax; ++ll)
+   for(int ll = 1; ll<= m; ++ll)
       {
-       T const dt = - ( 2.0e+00 * static_cast<double>(ll) - 1.0e+00 );
+       double const         dt = - ( 2.0e+00 * static_cast<double>(ll) - 1.0e+00 );
        
-       std::complex<T> ztemp1;
+       std::complex<double> ztemp1;
 
        ztemp1.real(dt); ztemp1.imag(0.0e+00); 
 
        //
 
-       std::complex<T> const ztemp2 = zls_factor * ztemp1; 
+       std::complex<double> const ztemp2 = zls_factor * ztemp1; 
 
-       std::complex<T> const ztemp3 = ztemp2 * zq;
+       std::complex<double> const ztemp3 = ztemp2 * zq;
 
        cpmvec[ll][ll] = ztemp3 * cpmvec[ll-1][ll-1];
       }
@@ -397,15 +487,15 @@ template <typename T>
    //        P_{m+1,m}(x) = (2m + 1)xP_{m,m)(x)
    //
 
-   for(int mval=0; mval<=mmax; ++mval)
+   for(int mval=0; mval<=m; ++mval)
       {
-       if( mval < lmax )  // Dont exceed Lmax - no storage
+       if( mval < n )  // Dont exceed Lmax - no storage
          {
-          std::complex<T> ztemp1 = z * cpmvec[mval][mval];
+          std::complex<double> ztemp1 = z * cpmvec[mval][mval];
 
-          T const dtemp2 = 2.0e+00 * static_cast<T>(mval) + 1.0e+00;
+          double const dtemp2 = 2.0e+00 * static_cast<double>(mval) + 1.0e+00;
 
-          std::complex<T> ztemp2;
+          std::complex<double> ztemp2;
 
           ztemp2.real(dtemp2); ztemp2.imag(0.0e+00); 
 
@@ -422,9 +512,9 @@ template <typename T>
    //     and apply the factor at the end.
    //
  
-   for(int mval=0; mval<mmax; ++mval)
+   for(int mval=0; mval<m; ++mval)
       {
-       for(int lval=mval+2; lval<=lmax; ++lval)
+       for(int lval=mval+2; lval<=n; ++lval)
           {
            //
            //.... First part of recursion 
@@ -432,18 +522,18 @@ template <typename T>
            //       (2*l - 1) z P_{l-1,m} (z) 
            //
 
-           std::complex<T> zpart1;
+           std::complex<double> zpart1;
 
            {
-            T const dtemp11 = 2.0e+00 * static_cast<double>(lval) - 1.0e+00;
+            double const dtemp11 = 2.0e+00 * static_cast<double>(lval) - 1.0e+00;
 
-            std::complex<T> ztemp11;
+            std::complex<double> ztemp11;
 
             ztemp11.real(dtemp11); ztemp11.imag(0.0e+00);
 
             //
 
-            std::complex<T> ztemp12 = z * cpmvec[lval-1][mval];
+            std::complex<double> ztemp12 = z * cpmvec[lval-1][mval];
 
             zpart1 = ztemp11 * ztemp12;
            }
@@ -455,13 +545,13 @@ template <typename T>
            //       (l + m - 1) P_{l-2,m} 
            //
 
-           std::complex<T> zpart2;           
+           std::complex<double> zpart2;           
 
            {
-            T const dtemp21 = static_cast<T>(lval) + 
-                              static_cast<T>(mval) - 1.0e+00;
+            double const dtemp21 = static_cast<double>(lval) + 
+                                   static_cast<double>(mval) - 1.0e+00;
 
-            std::complex<T> ztemp21;
+            std::complex<double> ztemp21;
 
             ztemp21.real(dtemp21); ztemp21.imag(0.0e+00);
 
@@ -473,18 +563,18 @@ template <typename T>
            //.... Prepare the term in brackets in equation (4.4.11)
            //
 
-           std::complex<T> zbrackets = zpart1 - zpart2;
+           std::complex<double> zbrackets = zpart1 - zpart2;
 
            //
 
-           std::complex<T> zfactor;
+           std::complex<double> zfactor;
 
            {
             int const itemp = lval - mval;
 
-            T const dtemp3 = static_cast<T>(itemp);  
+            double const dtemp3 = static_cast<double>(itemp);  
 
-            T const dtemp4 = 1.0e+00/dtemp3;
+            double const dtemp4 = 1.0e+00/dtemp3;
 
             zfactor.real(dtemp4); zfactor.imag(0.0e+00);
            }
@@ -513,19 +603,18 @@ template <typename T>
 
    return;
   }
-   // End of complex_unnormalized_assoc_regular_legendre()
+   // End of clpmn()
 
 /**
  *  Function: complex_unnormalized_assoc_irregular_legendre()
  *
+ *         
  */
-template <typename T> 
-   typename std::enable_if<std::is_floating_point<T>::value,void>::type  
-     complex_unnormalized_assoc_irregular_legendre(
+void complex_unnormalized_assoc_irregular_legendre(
            unsigned int const mmax, 
            unsigned int const lmax,
-           std::complex<T> z,
-           std::vector<std::vector<std::complex<T> > > &zcqmvec)
+           std::complex<double> z,
+           std::vector<std::vector<std::complex<double> > > &zcqmvec)
   {
    bool const zdebug = true;
 
@@ -544,21 +633,7 @@ template <typename T>
       printf("        Lmax (n) = %4u \n", lmax);
       printf("        Mmax (m) = %4u   ", mmax);
       printf("\n\n");
-
-      std::string cformat_str = " ";
-
-      if(  ( typeid(T) == typeid(double) ) ||
-           ( typeid(T) == typeid(float)  ) )
-        {
-         cformat_str = "        z = (%10.6f,%10.6f) \n";
-        }
-      else if( typeid(T) == typeid(long double) )
-        {
-         cformat_str = "        z = (%10.6Lf,%10.6Lf) \n";
-        }
-
-      printf(cformat_str.c_str(), z.real(), z.imag());
-
+      printf("        z = (%10.6f,%10.6f) \n", z.real(), z.imag());
       printf("\n\n");
       printf("      **** End of input data");
       printf("\n\n");
@@ -572,19 +647,19 @@ template <typename T>
    //     of the compiler 
    //
   
-   std::complex<T> ZMINUS1;
+   std::complex<double> ZMINUS1;
 
    ZMINUS1.real(-1.0e+00);
    ZMINUS1.imag(0.0e+00);
 
-   std::complex<T> ZERO;  std::complex<T> ZONE;  std::complex<T> ZTWO;
+   std::complex<double> ZERO;  std::complex<double> ZONE;  std::complex<double> ZTWO;
 
    ZERO.real(0.0e+00);         ZONE.real(1.0e+00);         ZTWO.real(2.0e+00);
    ZERO.imag(0.0e+00);         ZONE.imag(0.0e+00);         ZTWO.imag(0.0e+00);
 
    //
 
-   std::complex<T> ZHALF;
+   std::complex<double> ZHALF;
 
    ZHALF.real(0.5e+00); 
    ZHALF.imag(0.0e+00);
@@ -606,15 +681,15 @@ template <typename T>
    //--- Are we at the point +1 or -1 on the real axis.
    //
 
-   T const drealabs = z.real();
-   T const dimagabs = z.imag();
+   double const drealabs = z.real();
+   double const dimagabs = z.imag();
 
    bool const z_is_real_and_abs_is_1 = (drealabs == 1.0D+00) && 
                                        (dimagabs == 0.0D+00);
 
    //
 
-   T const zabs = std::abs(z);
+   double const zabs = std::abs(z);
 
    bool const z_inside_unit_circle  = zabs < 1.0e+00;
 
@@ -624,22 +699,8 @@ template <typename T>
 
    if(zdebug)
      {
-      std::string cformat_str = " ";
-
-      if(  ( typeid(T) == typeid(double) ) ||
-           ( typeid(T) == typeid(float) ) )
-        {
-         cformat_str = "      Absolute value of z = %13.6f ";
-        }
-      else if( typeid(T) == typeid(long double) )
-        {
-         cformat_str = "      Absolute value of z = %13.6Lf ";
-        }
-
-      printf(cformat_str.c_str(), zabs);
+      printf("      Absolute value of z = %13.6f ", zabs);
       printf("\n\n");
-
-      //
 
       if(z_is_real_and_abs_is_1)
         {
@@ -670,7 +731,7 @@ template <typename T>
    //     Let's now set that factor.
    //
 
-   std::complex<T> zls_factor; 
+   std::complex<double> zls_factor; 
 
    if(z_inside_unit_circle)
      {
@@ -687,13 +748,13 @@ template <typename T>
    //---- Next compute some auxiliary variables 
    //
 
-   std::complex<T> const zsqd = z * z;
+   std::complex<double> const zsqd = z * z;
 
-   std::complex<T> const zone_minus_zsqd = ZONE - zsqd;
+   std::complex<double> const zone_minus_zsqd = ZONE - zsqd;
 
-   std::complex<T> const zs = zls_factor * zone_minus_zsqd;
+   std::complex<double> const zs = zls_factor * zone_minus_zsqd;
 
-   std::complex<T> const zq = std::sqrt(zs);  
+   std::complex<double> const zq = std::sqrt(zs);  
 
    //
    //---- Computation of zcq0 
@@ -703,18 +764,18 @@ template <typename T>
    //     The factor s represent zls_factor above.
    //
 
-   std::complex<T> zcq0; 
+   std::complex<double> zcq0; 
 
    {
-    std::complex<T> z_plus_1  = z + ZONE; 
+    std::complex<double> z_plus_1  = z + ZONE; 
 
-    std::complex<T> z_minus_1 = z - ZONE;
+    std::complex<double> z_minus_1 = z - ZONE;
 
-    std::complex<T> ztemp1 = z_plus_1 / z_minus_1;
+    std::complex<double> ztemp1 = z_plus_1 / z_minus_1;
 
-    std::complex<T> ztemp2 = zls_factor * ztemp1;
+    std::complex<double> ztemp2 = zls_factor * ztemp1;
 
-    std::complex<T> ztemp3 = std::log(ztemp2); 
+    std::complex<double> ztemp3 = std::log(ztemp2); 
 
     zcq0 = ZHALF * ztemp3;
    }
@@ -722,21 +783,7 @@ template <typename T>
 
    if(zdebug)
      {
-      T testprint = 0.0e+00;
-
-      std::string cformat_str = " ";
-
-      if(  ( typeid(T) == typeid(double) ) ||
-           ( typeid(T) == typeid(float) ) )
-        {
-         cformat_str = "      zcq0 = (%13.6e,%13.6e) "; 
-        }
-      else if( typeid(T) == typeid(long double) )
-        {
-         cformat_str = "      zcq0 = (%13.6Le,%13.6Le) "; 
-        }
-
-      printf(cformat_str.c_str(), zcq0.real(), zcq0.imag()); 
+      printf("      zcq0 = (%13.6e,%13.6e) ", zcq0.real(), zcq0.imag()); 
       printf("\n\n");
      }
 
@@ -822,9 +869,9 @@ template <typename T>
       //
       //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-      std::complex<T> zcqf2 = ZERO;
-      std::complex<T> zcqf1 = ZONE;
-      std::complex<T> zcqf0 = ZERO;
+      std::complex<double> zcqf2 = ZERO;
+      std::complex<double> zcqf1 = ZONE;
+      std::complex<double> zcqf0 = ZERO;
 
       for(int k = km; k>= 0; k--)
          {
@@ -836,16 +883,16 @@ template <typename T>
 
           int const itwok_plus_three = itwok + 3;
 
-          T const dtwok_plus_three = static_cast<T>(itwok_plus_three);
+          double const dtwok_plus_three = static_cast<double>(itwok_plus_three);
 
-          std::complex<T> ztwok_plus_three;
+          std::complex<double> ztwok_plus_three;
 
           ztwok_plus_three.real(dtwok_plus_three); 
           ztwok_plus_three.imag(0.0e+00);
 
-          std::complex<T> ztemp1 = ztwok_plus_three * z;
+          std::complex<double> ztemp1 = ztwok_plus_three * z;
 
-          std::complex<T> znumerator1 = ztemp1 * zcqf1; 
+          std::complex<double> znumerator1 = ztemp1 * zcqf1; 
 
           //
           //.... Ok, build the right hand side term within the bracket
@@ -853,14 +900,14 @@ template <typename T>
 
           int const k_plus_two     = k + 2;
 
-          T const dk_plus_two = static_cast<T>(k_plus_two);
+          double const dk_plus_two = static_cast<double>(k_plus_two);
 
-          std::complex<T> zkplus_two;
+          std::complex<double> zkplus_two;
 
           zkplus_two.real(dk_plus_two);
           zkplus_two.imag(0.0e+00);
 
-          std::complex<T> znumerator2 = zkplus_two * zcqf2; 
+          std::complex<double> znumerator2 = zkplus_two * zcqf2; 
 
           //
           //.... Compute the bracket in equation (4.5.10)
@@ -868,7 +915,7 @@ template <typename T>
           //     Its the numerator of the fraction
           //
 
-          std::complex<T> znumerator = znumerator1 - znumerator2;
+          std::complex<double> znumerator = znumerator1 - znumerator2;
 
           //
           //.... Compute the denominator of equation (4.5.10)
@@ -876,14 +923,14 @@ template <typename T>
 
           int const k_plus_one = k + 1;
 
-          T const dk_plus_one = static_cast<T>(k_plus_one);
+          double const dk_plus_one = static_cast<double>(k_plus_one);
 
-          std::complex<T> zk_plus_one;
+          std::complex<double> zk_plus_one;
 
           zk_plus_one.real(dk_plus_one);
           zk_plus_one.imag(0.0e+00);
 
-          std::complex<T> zdenominator = zk_plus_one;
+          std::complex<double> zdenominator = zk_plus_one;
 
           //
           //.... All the parts are in place
@@ -920,11 +967,11 @@ template <typename T>
       //                                        F_{0}^{0} (z)  
       //
 
-      std::complex<T> zfactor = zcq0 / zcqf0; 
+      std::complex<double> zfactor = zcq0 / zcqf0; 
 
       for(int k=0; k<=lmax; ++k)
          {
-          std::complex<T> ztemp = zcqmvec[k][0] * zfactor; 
+          std::complex<double> ztemp = zcqmvec[k][0] * zfactor; 
 
           zcqmvec[k][0] = ztemp; 
          }
@@ -963,16 +1010,16 @@ template <typename T>
 
           int const itwok_plus_three = itwok + 3;
 
-          T const dtwok_plus_three = static_cast<T>(itwok_plus_three);
+          double const dtwok_plus_three = static_cast<double>(itwok_plus_three);
 
-          std::complex<T> ztwok_plus_three;
+          std::complex<double> ztwok_plus_three;
 
           ztwok_plus_three.real(dtwok_plus_three); 
           ztwok_plus_three.imag(0.0e+00);
 
-          std::complex<T> ztemp1 = ztwok_plus_three * z;
+          std::complex<double> ztemp1 = ztwok_plus_three * z;
 
-          std::complex<T> znumerator1 = ztemp1 * zcqf1; 
+          std::complex<double> znumerator1 = ztemp1 * zcqf1; 
 
           //
           //.... Ok, build the righthand side term within the bracket
@@ -981,14 +1028,14 @@ template <typename T>
 
           int const k_plus_one     = k + 1;
 
-          T const dk_plus_one = static_cast<T>(k_plus_one);
+          double const dk_plus_one = static_cast<double>(k_plus_one);
 
-          std::complex<T> zkplus_one;
+          std::complex<double> zkplus_one;
 
           zkplus_one.real(dk_plus_one);
           zkplus_one.imag(0.0e+00);
 
-          std::complex<T> znumerator2 = zkplus_one * zcqf2; 
+          std::complex<double> znumerator2 = zkplus_one * zcqf2; 
 
           //
           //.... Compute the bracket in equation (4.5.10)
@@ -996,7 +1043,7 @@ template <typename T>
           //     Its the numerator of the fraction
           //
 
-          std::complex<T> znumerator = znumerator1 - znumerator2;
+          std::complex<double> znumerator = znumerator1 - znumerator2;
 
           //
           //.... Compute the denominator of equation (4.5.10)
@@ -1004,14 +1051,14 @@ template <typename T>
 
           int const k_plus_two = k + 2;
 
-          T const dk_plus_two = static_cast<T>(k_plus_two);
+          double const dk_plus_two = static_cast<double>(k_plus_two);
 
-          std::complex<T> zk_plus_two;
+          std::complex<double> zk_plus_two;
 
           zk_plus_two.real(dk_plus_two);
           zk_plus_two.imag(0.0e+00);
 
-          std::complex<T> zdenominator = zk_plus_two;
+          std::complex<double> zdenominator = zk_plus_two;
 
           //
           //.... All the parts are in place
@@ -1048,13 +1095,13 @@ template <typename T>
       //                                     sqrt(s(1-z*z))*F_{0}^{1}(z)  
       //
 
-      std::complex<T> zfactor1_temp = ZMINUS1 / zq;
+      std::complex<double> zfactor1_temp = ZMINUS1 / zq;
  
-      std::complex<T> zfactor1 = zfactor1_temp / zcqf0; 
+      std::complex<double> zfactor1 = zfactor1_temp / zcqf0; 
 
       for(int k=0; k<=lmax; ++k)
          {
-          std::complex<T> ztemp = zcqmvec[k][1] * zfactor1; 
+          std::complex<double> ztemp = zcqmvec[k][1] * zfactor1; 
 
           zcqmvec[k][1] = ztemp; 
          }
@@ -1075,8 +1122,8 @@ template <typename T>
 
       for(int lval=0; lval<=lmax; ++lval)
          {
-          std::complex<T> zcq0 = zcqmvec[lval][0];
-          std::complex<T> zcq1 = zcqmvec[lval][1];
+          std::complex<double> zcq0 = zcqmvec[lval][0];
+          std::complex<double> zcq1 = zcqmvec[lval][1];
 
           for(int mval=2; mval<=mmax; ++mval)
              {
@@ -1084,20 +1131,20 @@ template <typename T>
               //.... First term in the recursion of (4.4.10)
               //
 
-              std::complex<T> zterm_first = ZERO;
+              std::complex<double> zterm_first = ZERO;
 
               {
-               T const dmval_plus_1 = static_cast<T>(mval - 1);
+               double const dmval_plus_1 = static_cast<double>(mval - 1);
 
-               T const dtemp11      = -2.0e+00 * dmval_plus_1;  
+               double const dtemp11      = -2.0e+00 * dmval_plus_1;  
 
-               std::complex<T> ztemp11;
+               std::complex<double> ztemp11;
 
                ztemp11.real(dtemp11); ztemp11.imag(0.0e+00);
 
-               std::complex<T> ztemp12 = ztemp11 * z;
+               std::complex<double> ztemp12 = ztemp11 * z;
 
-               std::complex<T> ztemp13 = ztemp12 / zq;
+               std::complex<double> ztemp13 = ztemp12 / zq;
 
                zterm_first  = ztemp13 * zcq1;
               }
@@ -1107,19 +1154,19 @@ template <typename T>
               //.... Second term in the recursion of (4.4.10)
               //
 
-              std::complex<T> zterm_second = ZERO;
+              std::complex<double> zterm_second = ZERO;
 
               {
-               T const dlval_plus_mval_minus_1 
-                              = static_cast<T>(lval + mval + 1);
+               double const dlval_plus_mval_minus_1 
+                              = static_cast<double>(lval + mval + 1);
 
-               T const dlval_minus_mval_plus_2
-                              = static_cast<T>(lval - mval + 2);
+               double const dlval_minus_mval_plus_2
+                              = static_cast<double>(lval - mval + 2);
 
-               T const dtemp21 = dlval_plus_mval_minus_1 * 
+               double const dtemp21 = dlval_plus_mval_minus_1 * 
                                         dlval_minus_mval_plus_2;
 
-               std::complex<T> ztemp21;
+               std::complex<double> ztemp21;
 
                ztemp21.real(dtemp21); ztemp21.imag(0.0e+00);
 
@@ -1133,7 +1180,7 @@ template <typename T>
               //     Note that its a subtraction
               //
 
-              std::complex<T> zcqf = zterm_first - zterm_second;
+              std::complex<double> zcqf = zterm_first - zterm_second;
 
               zcqmvec[lval][mval] = zcqf;
 
@@ -1165,399 +1212,10 @@ template <typename T>
   }
    // End of ...()
 
-/**
- *  Method: power_complx_to_unsigned_int()
- *
- *  Given a complex number, raise it to a positive integer power. 
- *
- *  Restrict instantiations to std::complex<float>, 
- *                             std::complex<double>      and
- *                             std::complex<long double>
- *
- */
-template <typename T, bool ZDEBUG> 
-   std::complex< typename std::enable_if<std::is_floating_point<T>::value,T>::type > 
-           power_complx_to_unsigned_int(std::complex<T> const &z, 
-                                        unsigned int    const ipow)
-  {
-   if(ZDEBUG)
-     {
-      std::ostringstream os;
-
-      os.str(""); os.clear();
-
-      os << "\n\n"
-         << "          >>>>> Template instantiation: power_complx_to_unsigned_int()"
-         << "\n\n"
-         << "          z = (" << z.real() << ", " << z.imag() << ") " << " - power (ipow) = " << ipow
-         << "\n\n";
-
-      std::cout << os.str() << "\n";
-     }
-
-   //
-
-   std::complex<T> const zsqd = z*z;
-
-   std::complex<T> zpow(0.0e+00,0.0e+00);
-   
-   //
-
-   switch(ipow)
-     {
-      case  0: 
-              zpow.real(1.0e+00);
-              zpow.imag(0.0e+00);
-              break;
-
-      case  1:
-              zpow = z;
-              break;
-
-      case 2: 
-              zpow = z*z;
-              break;
-
-      case 3: 
-              zpow = z*z*z;
-              break;
-
-      case 4: 
-              zpow = zsqd * zsqd;
-              break;
-
-      default:
-              zpow = z;
-
-              for(int i=2; i<=ipow; i++)
-                 {
-                  zpow = zpow * z;
-                 }
-              break;
-     }
-
-   //
-   //---- Return point
-   //
-
-   if(ZDEBUG)
-     {
-      std::ostringstream os;
-
-      os.str(""); os.clear();
-
-      os << "          Result: zpow = (" << zpow.real() << ", " << zpow.imag() << ") " 
-         << "\n\n" 
-         << "          <<<<< Completed: power_complx_to_unsigned_int()"
-         << "\n\n";
-
-      std::cout << os.str() << "\n";
-     }
-
-   return zpow;
-  }
-   // End of template power_complx_to_unsigned_int()
-
-/**
- *    cplm()
- *                                                                       
- *    Calculates the regular associated legendre function  P  ( z )    
- *                                                          l,m       
- *    l,m assumed to be integer                            
- *    z   complex and |z| > 1.0 
- *                    
- *    Developed from an initial version by Bell and McLaughlin (1983)
- *    Never published.          
- *                                      
- */
-template <typename T, bool ZDEBUG> 
-   typename std::enable_if<std::is_floating_point<T>::value,void>::type  
-     cplm(unsigned int const l, 
-          unsigned int const m,
-          std::complex<T> const z,
-          std::complex<T> zretVal)                                  
-  {
-   //
-   //.... Local complex constants  
-   //
-   
-   std::complex<double> const ZERO(0.0e+00, 0.0e+00); 
-   std::complex<double> const ZONE(1.0e+00, 0.0e+00); 
-   std::complex<double> const ZTWO(2.0e+00, 0.0e+00);
-
-   //
-   //.... Local double precision constants 
-   //
-
-   double const  DTHRESHOLD_POLE = 1.0e-09; 
-
-   double const  DHALF = 0.5d+00;
-   double const  DONE  = 1.0d+00;
-   double const  DTWO  = 2.0d+00;
-
-   //
-   //.... Local boolean variables  
-   //
-
-   bool const zdebug = true;
-
-   //
-   //....  Output string stream 
-   //
-
-   std::ostringstream os;
-
-   //
-   //---- Debug banner header 
-   //
-
-   if(zdebug)
-     {
-      os.str(""); os.clear();
-
-      os << "     >>>> cplm - compute associated Legendre functions "
-         << "\n\n"
-         << "     Input data: "  
-         << " l = " << l 
-         << " m = " << m 
-         << " z = " << z 
-         << "\n\n";
-
-      std::cout << os.str() << "\n";
-     }
-
-   //
-   //---- Default the return value
-   //
-
-   zretVal = ZERO;
-
-   //
-   //---- Check arguments
-   //
-   //     l should be >= 0  
-   //     m should be [-l,+l]
-   //
-   //     z should not be (1,0) - need to pick a delta neighbouroud.
-   //
-   //   if(l .lt. 0)then
-   //     write(iwrite,9000)
-   //     stop 999
-   //   endif
-   //
-   //   if((m .lt. -l) .or. (m > l))then
-   //     write(iwrite,9000)
-   //     stop 999
-   //   endif 
-   //
-   //.... Distance from (1,0) - the pole 
-   //
-
-   std::complex<double> zdiff = z - ZONE;
-
-   double dt = std::abs(z);
-
-   if(dt < DTHRESHOLD_POLE)
-     {
-      os.str(""); os.clear();
-
-      os << "\n\n"
-         << "     ***** Error in cplm - compute associated Legendre functions"
-         << "\n\n"
-         << "     Z is too close to the singularity at +1 on real axis " 
-         << "\n\n";
-
-      std::cout << os.str() << "\n";
-
-      exit(-1);
-     } 
-
-   //
-   //---- Prepare values for use in computation
-   //
-
-   int    lm  = l - m;                       
-
-   int    lm2 = lm/2;                                                    
-
-   //
-   //---- First deal with term (ir = 0)
-   //
-   //               (2 * l)!
-   //        ---------------------------   *  z^(l - m)
-   //          (2^l) * (l!) * (l - m)! 
-   //
-   //     The pow() function gets bad press seeingly for int
-   //     arguments, since it works with real numbers. So, let's
-   //     roll our own here.
-   //
-
-   int const  itwo_l = 2*l;
-
-   //
-
-   if(l < 0)
-     {
-      os.str(""); os.clear();
-
-      os << "\n\n"
-         << "     ***** Error in cplm " 
-         << "\n\n"
-         << "     \"l\" is negative. "  
-         << "\n\n";
-
-      std::cout << os.str() << "\n";
-
-      exit(0);
-     }
-
-   //
-
-   int itwo_power_l = 0;
-
-   if(0 == l)
-     {
-      itwo_power_l = 1;
-     }
-   else if(1 == l)
-     {
-      itwo_power_l = 2;
-     }
-   else if( (l>=2) && (l<=31) )
-     {
-      itwo_power_l = 2 << (l - 1);
-     }
-   else
-     {
-      exit(1);
-     }
-
-   double const xtwo_power_l = static_cast<double>(itwo_power_l);
-
-   if(zdebug)
-     {
-      os.str(""); os.clear();
-
-      os << "\n\n"
-         << "     l = " << l << ",  2^l = " << itwo_power_l << " and as float = " << xtwo_power_l
-         << "\n\n";
-
-      std::cout << os.str() << "\n";
-
-     } 
-
-   //
-
-   double dfactorial_l, dfactorial_lm, dfactorial_2l;
-
-   real_factorial(l,dfactorial_l);
-
-   real_factorial(lm,dfactorial_lm);
-
-   real_factorial(itwo_l,dfactorial_2l);
-
-   //
-
-   double const denominator = xtwo_power_l * dfactorial_l * dfactorial_lm;                  
-
-   double       wlmro       = dfactorial_2l / denominator;                  
-
-   std::complex<double> zwlmro;
-
-   zwlmro.real(wlmro);  zwlmro.imag(0.0e+00);
-
-   //
-
-   std::complex<double> zpow = power_complx_to_unsigned_int<double,true>(z,lm);
-
-   std::complex<double> zsum = zwlmro * zpow;
-
-   //
-   //---- Now deal with terms ir = 1, 2, ... lm2 - indeed if any 
-   //                                  
-   //     We compute the following term, "wlmr",  at each value "ir" 
-   //
-   //            -1 * (l - m - 2*ir + 2) * (l - m + 1)
-   //           --------------------------------------- * z^(l - m - 2*ir)
-   //                 (2*ir) * 2 * (l - ir + 1)
-   //
-   //     Note the product relationship as we save this to "wlmro" and reuse
-   //     at next iteration.
-   //
- 
-   for(int ir=1; ir<=lm2; ++ir)
-      {
-       int const lmir = lm - 2*ir;                                                 
-       int const jlir = l  - ir;                                                  
-
-       double wlmr = -wlmro*(static_cast<double>(lmir) + DTWO)*(static_cast<double>(lmir) + DONE);                               
-       
-       wlmr = wlmr/(DTWO*static_cast<double>(ir)*(DTWO*static_cast<double>(jlir)+ DONE));                
-
-       //
-
-       std::complex<double> zwlmr;
-
-       zwlmr.real(wlmr); zwlmr.imag(0.0e+00);
-
-       //
-
-       std::complex<double> const zpowterm = power_complx_to_unsigned_int<double,true>(z,lmir);
-
-       std::complex<double> const t = zwlmr * zpowterm;                                             
-
-       zsum  = zsum + t;                                                    
-         
-       wlmro = wlmr;                                                  
-      }                                                         
-
-   //
-   //---- Now set the final value into the variable "p"
-   //
-
-   if(m == 0)
-     {                                             
-      zretVal = zsum;
-     }                               
-   else
-     {                                             
-      double const xn  = static_cast<double>(m) * DHALF;                                          
-
-      std::complex<double> const zsqd   = z*z;
-
-      std::complex<double> const ztemp  = zsqd - ZONE;
-
-      std::complex<double> const ztemp2 = std::pow(ztemp, xn);
-
-      zretVal = ztemp2 * zsum;                             
-     }  
-
-   //
-   //---- Return point 
-   //
-
-   if(zdebug)
-     {
-      os.str(""); os.clear();
-
-      os << "     Computed value of associated Legendre polynomial = " 
-         << "(" << zretVal.real() << ", " << zretVal.imag() << ") " 
-         << "\n\n"
-         << "     ***** cplm - completed \n";
-
-      std::cout << os.str() << "\n";
-     }
-
-   return;
-  }
-   // End function cplm() 
-
-#endif // For _ASSOC_LEGENDRE_TEMPLATED_COMPLEX_INCLUDE_176496_H_
-
-//********************************************************************** 
-//********************************************************************** 
+//************************************************************************
+//************************************************************************
 //
 //   End of file 
 //
-//********************************************************************** 
-//********************************************************************** 
+//************************************************************************
+//************************************************************************

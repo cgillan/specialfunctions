@@ -28,9 +28,11 @@
 #include <vector>
 #include <algorithm>
 
-#include <associated_legendre_functions.hxx>  
+#include <associated_legendre_functions_cmplx.hxx>  
+  
+#pragma STDC FENV_ACCESS ON  // Enable catching floating point exceptions
 
-#include <monitor_fl_pt_exceptions.hxx>
+static void monitor_fl_pt_exceptions();
 
 /**
  *   Main program - test harness
@@ -43,7 +45,7 @@ int main(int argc, char **argv)
    printf("     Computation of associated legendre functions \n");
    printf("     --------------------------------------------   ");
    printf("\n\n");
-   printf("     Complex argument and integer order and degree ");
+   printf("     Real argument and integer order and degree ");
    printf("\n\n");
 
    //
@@ -71,126 +73,22 @@ int main(int argc, char **argv)
    printf("         epsilon       : %13.7Le \n", std::numeric_limits<long double>::epsilon());
    printf("\n");
 
-   std::complex<long double>   zarg;
-
    //
-   //---- Determine, at runtime, the data type for which we were compiled
+   //---- Set the maximum L and M and argument "x"  
    //
 
-   std::string cformat_type_str = " ";
+   int const Lmax =  200;
+   int const Mmax =  200;
 
-   if(typeid(zarg) == typeid( std::complex<float>(0.0,1.0) ) )
-     {
-      cformat_type_str = "     Data type for complex argument is: float. \n\n     File name = %s";
-     }
-   else if(typeid(zarg) == typeid( std::complex<double>(0.0,1.0) ) )
-     {
-      cformat_type_str = "     Data type for complex argument is: double. \n\n     File name = %s";
-     }
-   else if(typeid(zarg) == typeid( std::complex<long double>(0.0,1.0) ) )
-     {
-      cformat_type_str = "     Data type for complex argument is: long double. \n\n     File name = %s";
-     }
-   else
-     {
-      printf("\n\n");
-      printf("     **** Error: Type for the complex argument is unknown");
-      printf("\n\n");
-
-      exit(0);
-     }
-
-   printf(cformat_type_str.c_str(), __FILE__);
-   printf("\n\n");
-
-   //
-   //---- Prepare vector of arguments 
-   //
-
-   std::vector<std::complex<long double> > zarg_vec;
-
-   {
-    std::complex<long double> zarg;
+   std::complex<long double> zarg;
  
-    zarg.real(0.5e+00); zarg.imag(0.0e+00);   zarg_vec.push_back(zarg);
-
-    zarg.real(1.5e+00); zarg.imag(0.0e+00);   zarg_vec.push_back(zarg);
-
-    zarg.real(2.0e+00); zarg.imag(0.0e+00);   zarg_vec.push_back(zarg);
-   }
-
-   //================================================================
-   //
-   //    L O O P  O V E R   A R G U M E N T S
-   //
-   //================================================================
-
-   for(int indx=0; indx<zarg_vec.size(); ++indx)
-   {
-   std::complex<long double> const zarg = zarg_vec[indx];
-
-   printf("\n\n "); 
-     for(int icol=2; icol<72;++icol) printf("-"); 
+   zarg.real(2.00e+00); zarg.imag(0.0e+00);
 
    //======================================================================
    //
    //     R E G U L A R   L E G E N D R E   F U N C T I O N S
    //
-   //     T E S T E D   V A L U E S 
-   //
    //======================================================================
-   //
-   //---- Begin scoping for P(l,m) tests
-   //
-
-   {
-
-   //---- Following are selected values from the tables of Zhang and Jin
-   //
-   //     See pages 118 and following of their book.
-   //
-
-   std::vector<int> l_vec_test_p { 1, 2, 3, 10, 2, 3, 4, 10, 3, 4, 5, 10, 4, 5, 6, 10 };
-   std::vector<int> m_vec_test_p { 1, 1, 1,  1, 2, 3, 2,  2, 3, 3, 3,  3, 4, 4, 4,  4 };
-
-   //
-   //---- Set the maximum L and M and argument "z"  
-   //
-
-   auto iter_max_l = std::max_element(std::begin(l_vec_test_p), std::end(l_vec_test_p)); 
-   auto iter_max_m = std::max_element(std::begin(m_vec_test_p), std::end(m_vec_test_p)); 
-
-   int const Ltemp = *iter_max_l;
-   int const Mtemp = *iter_max_m;
-
-   //printf("\n\n");
-   //printf("     List of P(l,m) values to be tested at each argument");
-   //printf("\n\n");
-   //printf("     Index    l      m   \n");
-   //printf("     -----  -----  ----- \n");
-
-   //for(int i=0; i<l_vec_test_p.size(); ++i)
-   //   {
-   //    printf("     %5d  %5d  %5d  \n", i+1, l_vec_test_p[i], m_vec_test_p[i]);
-   //   }
-   
-   //printf("\n\n");
-   //printf("      Maximum L value in test list = %4d \n", Ltemp);
-   //printf("      Maximum M value              = %4d \n", Mtemp);
-   //printf("\n\n");
-
-   //
-   //---- Given the way that the routines work with triangles and 
-   //     matrices, we find the largest of the two l,m and dimension
-   //     with that 
-   //
-
-   int const Itemp = std::max(Ltemp,Mtemp);
-
-   int const Lmax = Itemp;
-   int const Mmax = Itemp;
-
-   //
 
    std::vector<std::vector<std::complex<long double> > > plm_mat;
 
@@ -211,120 +109,45 @@ int main(int argc, char **argv)
    monitor_fl_pt_exceptions();
 
    //
-   //---- Print out the results 
-   //
-
-   std::string cformat_plm_str = " ";
-
-   if(typeid(zarg) == typeid( std::complex<float>(0.0,1.0) ) )
-     {
-      cformat_plm_str = "     %3d  %3d  (%15.6e,%15.6e)   (%15.6e, %15.6e) \n"; 
-     }
-   else if(typeid(zarg) == typeid( std::complex<double>(0.0,1.0) ) )
-     {
-      cformat_plm_str = "     %3d  %3d  (%15.6e,%15.6e)   (%15.6e, %15.6e) \n"; 
-     }
-   else if(typeid(zarg) == typeid( std::complex<long double>(0.0,1.0) ) )
-     {
-      cformat_plm_str = "     %3d  %3d  (%15.6Le,%15.6Le)   (%15.6Le, %15.6Le) \n"; 
-     }
-   else
-     {
-      printf("\n\n");
-      printf("     **** Error: Type for the complex argument is unknown");
-      printf("\n\n");
-     }
 
    printf("\n\n");
    printf("     Computed associated Legendre functions of the first kind (regular)");
    printf("\n\n");
-   printf("      l    m           Argument (z)                   Associated Legendre function    \n");
-   printf("     ---  ---  ---------------------------------   ---------------------------------- \n");
+   printf("      l    m        z        Associated Legendre function \n");
+   printf("     ---  ---  ------------- ---------------------------- \n");
 
-   for(int i=0; i<l_vec_test_p.size(); ++i)
+   std::string cformat_str = " ";
+
+   for(int l=0; l<=Lmax; ++l)
       {
-       int const l = l_vec_test_p[i];
-       int const m = m_vec_test_p[i];
+       for(int m=0; m<=l; ++m)
+          {
+           long double const xarg = zarg.real();
+           long double const yarg = zarg.imag();
 
-       if(m > l) continue; // Q_lm can have m > l but not P_lm.
+           //
 
-       long double const xarg = zarg.real();
-       long double const yarg = zarg.imag();
+           std::complex<long double> const zplm = plm_mat[l][m];
 
-       //
+           long double const xplm = zplm.real();
+           long double const yplm = zplm.imag();
 
-       std::complex<long double> const zplm = plm_mat[l][m];
-
-       long double const xplm = zplm.real();
-       long double const yplm = zplm.imag();
-
-       printf(cformat_plm_str.c_str(), l, m, xarg, yarg, xplm, yplm);
+           printf("     %3d  %3d  (%15.6Le,%15.6Le)   (%15.6Le, %15.6Le) \n", 
+                   l, m, 
+                   xarg, yarg, 
+                   xplm, yplm);
+          }
       }
-
-   printf("\n\n");
-
-   //
-
-   }  
-
-   // End of  scoping for P(l,m) tests
 
    //======================================================================
    //
    //     I R R E G U L A R   L E G E N D R E   F U N C T I O N S
    //
    //======================================================================
-   //
-   //---- Begin scoping for Q(l,m) tests
-   //
 
-   {
-
-   //---- Following are selected values from the tables of Zhang and Jin
-   //
-   //     See pages 118 and following of their book.
-   //
-
-   std::vector<int> l_vec_test_q {  0, 1, 2, 10, 0, 1, 2, 10, 0, 1, 2, 10, 0, 1, 2, 10 };
-   std::vector<int> m_vec_test_q {  1, 1, 1,  1, 2, 2, 2,  2, 3, 3, 3,  3, 4, 4, 4,  4 };
-
-   //
-   //---- Set the maximum L and M and argument "z"  
-   //
-
-   auto iter_max_l = std::max_element(std::begin(l_vec_test_q), std::end(l_vec_test_q)); 
-   auto iter_max_m = std::max_element(std::begin(m_vec_test_q), std::end(m_vec_test_q)); 
-
-   int const Ltemp = *iter_max_l;
-   int const Mtemp = *iter_max_m;
-
-   /**
-   printf("     List of Q(l,m) values to be tested at each argument");
    printf("\n\n");
-   printf("     Index    l      m   \n");
-   printf("     -----  -----  ----- \n");
-
-   for(int i=0; i<l_vec_test_q.size(); ++i)
-      {
-       printf("     %5d  %5d  %5d  \n", i+1, l_vec_test_q[i], m_vec_test_q[i]);
-      }
-   
-   printf("\n\n");
-   printf("      Maximum L value in test list = %4d \n", Ltemp);
-   printf("      Maximum M value              = %4d \n", Mtemp);
-   printf("\n\n");
-   */
-
-   //
-   //---- Given the way that the routines work with triangles and 
-   //     matrices, we find the largest of the two l,m and dimension
-   //     with that 
-   //
-
-   int const Itemp = std::max(Ltemp,Mtemp);
-
-   int const Lmax = Itemp;
-   int const Mmax = Itemp;
+   printf("     Computing regular associated Legendre functions \n");
+   printf("     for m in range [%d,%d] and l in the range [%d,%d] ", 0,Mmax, 0,Lmax);
 
    //
 
@@ -346,69 +169,27 @@ int main(int argc, char **argv)
    monitor_fl_pt_exceptions();
 
    //
-   //---- Print out the results 
-   //
 
-   std::string cformat_qlm_str = " ";
-
-   if(typeid(zarg) == typeid( std::complex<float>(0.0,1.0) ) )
-     {
-      cformat_qlm_str = "     %3d  %3d  (%15.6e,%15.6e)   (%15.6e, %15.6e) \n"; 
-     }
-   else if(typeid(zarg) == typeid( std::complex<double>(0.0,1.0) ) )
-     {
-      cformat_qlm_str = "     %3d  %3d  (%15.6e,%15.6e)   (%15.6e, %15.6e) \n"; 
-     }
-   else if(typeid(zarg) == typeid( std::complex<long double>(0.0,1.0) ) )
-     {
-      cformat_qlm_str = "     %3d  %3d  (%15.6Le,%15.6Le)   (%15.6Le, %15.6Le) \n"; 
-     }
-   else
-     {
-      printf("\n\n");
-      printf("     **** Error: Type for the complex argument is unknown");
-      printf("\n\n");
-     }
-
+   printf("\n\n");
+   printf("     Complex argument (z) = (%15.6Lf,%15.6Lf) ", zarg.real(), zarg.imag());
    printf("\n\n");
    printf("     Computed associated Legendre functions of the second kind (irregular)");
    printf("\n\n");
-   printf("      l    m           Argument (z)                   Associated Legendre function    \n");
-   printf("     ---  ---  ---------------------------------   ---------------------------------- \n");
+   printf("      l    m        z        Associated Legendre function \n");
+   printf("     ---  ---  ------------- ---------------------------- \n");
 
-   for(int i=0; i<l_vec_test_q.size(); ++i)
+   for(int ll=0; ll<=Lmax; ++ll)
       {
-       int const ll = l_vec_test_q[i];
-       int const mm = m_vec_test_q[i];
-
-       long double const xarg = zarg.real();
-       long double const yarg = zarg.imag();
-
-       //
-
-       std::complex<long double> const zqlm = qlm_mat[ll][mm];
-
-       long double const xqlm = zqlm.real();
-       long double const yqlm = zqlm.imag();
-
-       //
-
-       printf(cformat_qlm_str.c_str(), ll, mm, xarg, yarg, xqlm, yqlm);
+       for(int mm=0; mm<=Mmax; ++mm)
+          {
+           printf("     %3d  %3d  (%15.6Le,%15.6Le)   (%15.6Le,%15.6Le) \n", 
+                   ll, mm, 
+                   zarg.real(), 
+                   zarg.imag(),
+                   qlm_mat[ll][mm].real(), 
+                   qlm_mat[ll][mm].imag());
+          }
       }
-
-   //
-
-   }  
-
-   // End of  scoping for Q(l,m) tests
-
-   } // End loop over arguments 
-
-   //================================================================
-   //
-   //    E N D   L O O P  O V E R   A R G U M E N T S
-   //
-   //================================================================
 
    //
    //---- End of main program 
@@ -421,6 +202,72 @@ int main(int argc, char **argv)
    return 0;
   }
    // End of main
+
+/**
+ *   monitor_fl_pt_exceptions()
+ *
+ *   Test current state of the floating point flags and report
+ *   to the job log
+ * 
+ *   Before calling the code to be monitored, all floating point 
+ *   exceptions whould be cleared by calling 
+ *
+ *     std::feclearexcept(FE_ALL_EXCEPT);
+ *
+ *   This routine can be called after the critial code to 
+ *   report on what happened.  
+ *
+ */
+static void monitor_fl_pt_exceptions()
+  {
+   printf("\n\n");
+   printf("     Reporting status of floating point exception flags.");
+   printf("\n\n");
+
+   if(std::fetestexcept(FE_ALL_EXCEPT))
+     {
+      if(std::fetestexcept(FE_DIVBYZERO)) 
+        {
+         printf("     **** Division by zero reported");
+         printf("\n");
+        }
+
+      if(std::fetestexcept(FE_INEXACT)) 
+        {
+         printf("     **** Inexact computation ");
+         printf("\n");
+        }
+
+      if(std::fetestexcept(FE_INVALID)) 
+        {
+         printf("     **** Invalid computation ");
+         printf("\n");
+        }
+
+      if(std::fetestexcept(FE_OVERFLOW)) 
+        {
+         printf("     **** Overflow reported ");
+         printf("\n");
+        }
+
+      if(std::fetestexcept(FE_UNDERFLOW)) 
+        {
+         printf("     **** Underflow reported ");
+         printf("\n");
+        }
+     }
+   else
+     {
+      printf("     No floating point exception flags are set.");
+      printf("\n");
+     }
+      // End of test on floating point exceptions being raised
+
+   //
+
+   return;
+  }
+   // End of monitor_fl_pt_exceptions()
 
 //************************************************************************
 //************************************************************************
